@@ -1,0 +1,70 @@
+
+#######################################################################
+#
+#                 Cambridge Crystallographic Data Centre
+#                                CCDC 
+#
+#######################################################################
+#
+# If this CIF has been generated from an entry in the Cambridge 
+# Structural Database, then it will include bibliographic, chemical, 
+# crystal, experimental, refinement or atomic coordinate data resulting 
+# from the CCDC's data processing and validation procedures.
+#
+#######################################################################
+
+data_ABAZUY
+_symmetry_cell_setting           orthorhombic
+_symmetry_space_group_name_H-M   'P 21 21 21'
+_symmetry_Int_Tables_number      19
+_space_group_name_Hall           'P 2ac 2ab'
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+1 x,y,z
+2 1/2-x,-y,1/2+z
+3 1/2+x,1/2-y,-z
+4 -x,1/2+y,1/2-z
+_cell_length_a                   5.036(2)
+_cell_length_b                   7.333(2)
+_cell_length_c                   12.566(4)
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                90
+_cell_volume                     464.05
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+S1 S 1.0232(1) 0.4287(1) 0.5425(1)
+S2 S 1.2825(1) 0.4113(1) 0.7369(1)
+O1 O 0.6186(2) 0.6613(2) 0.5705(1)
+O2 O 1.4642(2) 0.2877(2) 0.6828(1)
+F1 F 0.6871(2) 0.5426(2) 0.4118(1)
+N1 N 1.0535(3) 0.4895(2) 0.6708(1)
+C1 C 0.7451(3) 0.5654(2) 0.5148(1)
+S1 S 0.4768(1) 0.5713(1) 0.0425(1)
+S2 S 0.2175(1) 0.5887(1) 0.2369(1)
+O1 O 0.8814(2) 0.3387(2) 0.0705(1)
+O2 O 0.0358(2) 0.7123(2) 0.1828(1)
+F1 F 0.8129(2) 0.4574(2) -0.0882(1)
+N1 N 0.4465(3) 0.5105(2) 0.1708(1)
+C1 C 0.7549(3) 0.4346(2) 0.0148(1)
+S1 S 0.5232(1) 0.0713(1) 0.4575(1)
+S2 S 0.7825(1) 0.0887(1) 0.2631(1)
+O1 O 0.1186(2) -0.1613(2) 0.4295(1)
+O2 O 0.9642(2) 0.2123(2) 0.3172(1)
+F1 F 0.1871(2) -0.0426(2) 0.5882(1)
+N1 N 0.5535(3) 0.0105(2) 0.3292(1)
+C1 C 0.2451(3) -0.0654(2) 0.4852(1)
+S1 S -0.0232(1) 0.9287(1) 0.9575(1)
+S2 S -0.2825(1) 0.9113(1) 0.7631(1)
+O1 O 0.3814(2) 1.1613(2) 0.9295(1)
+O2 O -0.4642(2) 0.7877(2) 0.8172(1)
+F1 F 0.3129(2) 1.0426(2) 1.0882(1)
+N1 N -0.0535(3) 0.9895(2) 0.8292(1)
+C1 C 0.2549(3) 1.0654(2) 0.9852(1)
+
+#END

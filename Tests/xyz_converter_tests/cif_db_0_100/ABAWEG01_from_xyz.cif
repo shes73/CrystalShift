@@ -1,0 +1,44 @@
+./ABAWEG01_from_xyz.cif_generated_by_CrystalShift
+_symmetry_cell_setting triclinic
+_symmetry_space_group_name_H-M 'P 1'
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+1 x,y,z
+_cell_length_a 4.942000
+_cell_length_b 6.596000
+_cell_length_c 7.000000
+_cell_angle_alpha 115.840000
+_cell_angle_beta 104.540000
+_cell_angle_gamma 91.090000
+_cell_volume 196.617212
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+O1 O 1.024510 0.714960 0.883180
+N2 N 0.552700 0.704080 0.798870
+H3 H 0.403000 0.719000 0.846000
+C4 C 0.514300 0.628700 0.564200
+H5 H 0.677900 0.699100 0.545300
+H6 H 0.342600 0.680800 0.502700
+C7 C 0.805900 0.740700 0.942000
+C8 C 0.812400 0.813800 1.178400
+H9 H 0.879300 0.696800 1.221600
+H10 H 0.621800 0.834700 1.193700
+H11 H 0.940300 0.957800 1.274400
+C12 C 0.485700 0.371300 0.435800
+N13 N 0.447300 0.295920 0.201130
+H14 H 0.597000 0.281000 0.154000
+C15 C 0.194100 0.259300 0.058000
+O16 O -0.024510 0.285040 0.116820
+C17 C 0.187600 0.186200 -0.178400
+H18 H 0.120700 0.303200 -0.221600
+H19 H 0.378200 0.165300 -0.193700
+H20 H 0.059700 0.042200 -0.274400
+H21 H 0.322100 0.300900 0.454700
+H22 H 0.657400 0.319200 0.497300
+
+#END
