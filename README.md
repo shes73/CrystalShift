@@ -63,7 +63,7 @@ Enter the path to save the new CIF file:
 ```
 
 ### 2. Supercell generation
-![basis_change_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/supercell_generation.jpg)
+![basis_change_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/supercell_visualisation.jpg)
 ```bash
 > crystalshift
 Choose the option you need:
@@ -78,7 +78,7 @@ Change basis of unit cell
 Please, choose the format of the input file: 
 1. CIF
 2. POSCAR
->1
+> 1
 Enter the path to the CIF file:
 > C:\cif_editor\VEWSIC.cif
 Enter the vectors of the basis transformation matrix.
@@ -104,8 +104,31 @@ Enter the path to save the new CIF file:
 ```
 
 ### 3. Atomic coordinates editor
+![atomic_coords_edition_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/atomic_coords_visualisation.jpg)
+```bash
+Choose the option you need:
+1. Change basis of unit cell
+2. Edit atomic coordinates
+3. Converter CIF -> POSCAR
+4. Converter CIF -> xyz
+5. Converter POSCAR -> CIF
+6. Converter POSCAR -> xyz
+> 2
+Edit atomic coordinates in the unit cell
+Please, choose the format of the input file:
+1. CIF
+2. POSCAR
+> 1
+Enter the path to the CIF file:
+> C:\cif_editor\VEWSIC_edited.cif  
+Enter the three float numbers separated by spaces that will be added to the coordinates of all atoms in the file (e.g. 0.25 0.0 0.0):
+> 0.375 0.0 0.0
+Enter the path to save the new CIF file:
+> C:\cif_editor\VEWSIC_layer_moved.cif
+```
 
 ### 4. Converters
+![CIF to POSCAR example](https://github.com/shes73/CrystalShift/blob/main/images/CIF_to_POSCAR.jpg)
 ```bash
 > crystalshift
 Choose the option you need:
@@ -135,6 +158,21 @@ Enter custom order:
 > H C O Br
 Enter the path to the POSCAR file:
 > C:\cif_editor\VEWSIC_POSCAR_3
+```
+
+![CIF to xyz example](https://github.com/shes73/CrystalShift/blob/main/images/CIF_to_xyz.jpg)
+```bash
+> crystalshift
+Choose the option you need:
+1. Change basis of unit cell
+2. Edit atomic coordinates
+3. Converter CIF -> POSCAR
+4. Converter CIF -> xyz
+5. Converter POSCAR -> CIF
+6. Converter POSCAR -> xyz
+> 4
+Enter the path to the CIF file:
+> C:\cif_editor\VEWSIC.cif
 ```
 
 ## Requirements
