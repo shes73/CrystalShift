@@ -139,6 +139,7 @@ Choose the option you need:
 5. Converter POSCAR -> CIF
 6. Converter POSCAR -> xyz
 > 3
+Converter CIF -> POSCAR
 Enter the path to the CIF file:
 > C:\cif_editor\VEWSIC.cif
 Choose the order for writing atoms to POSCAR:
@@ -171,8 +172,16 @@ Choose the option you need:
 5. Converter POSCAR -> CIF
 6. Converter POSCAR -> xyz
 > 4
+Converter CIF -> xyz
 Enter the path to the CIF file:
 > C:\cif_editor\VEWSIC.cif
+Choose the format for writing xyz file:
+1. Standard xyz format;
+2. Extended xyz format (with lattice parameters in the comment line);
+Enter your choice:
+> 2
+Enter the path to the xyz file:
+> C:\cif_editor\VEWSIC.xyz
 ```
 
 ## Requirements
