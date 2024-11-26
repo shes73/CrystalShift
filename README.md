@@ -128,6 +128,7 @@ Enter the path to save the new CIF file:
 ```
 
 ### 4. Converters
+![CIF to POSCAR example](https://github.com/shes73/CrystalShift/blob/main/images/format_converter_example.jpg)
 ![CIF to POSCAR example](https://github.com/shes73/CrystalShift/blob/main/images/CIF_to_POSCAR.jpg)
 ```bash
 > crystalshift
