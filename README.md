@@ -1,34 +1,151 @@
 # CrystalShift
-Crystal cell operating tool: basis change, format converter, atom coordinates editor and analysis of molecular layers.
+Crystal cell operating tool: basis changer, format converter, atom coordinates editor and analyzer of molecular structure.
 
 ## Installation
+You can download the repository using the command below or manually by downloading the archive:
 ```bash
-# You can download the repository using the command below or manually by downloading the archive
 git clone https://github.com/shes73/CrystalShift.git
 ```
 
-The program is distributed with open source code, to work with CrystalShift you need to build it. To do this, you need to go to the folder "main/crystalshift" or "main/crystalshift_layers", then you can simply use the Makefile:
+The program is distributed with open source code, to work with CrystalShift you need to build it. To do this, you need to go to the folder *"main/crystalshift"* or *"main/crystalshift_layers"*, then you can simply compile it via Makefile:
 ```bash
 make all
 ```
-or compile it yourself:
+Or do it manually. For the main CrystalShift module use the command below:
 ```bash
-# for main CrystalShift module
-gcc -std=c99 crystalshift.c -lm -o crystalshift.exe
-# for CrystalShift layers module
+gcc -std=c99 main.c structures.c poscar_parser.c poscar_writer.c cif_parser.c cif_writer.c xyz_parser.c xyz_writer.c atomic_coords_editor.c basis_changer.c -lm -o crystalshift
+```
+For CrystalShift layers module:
+```bash
 gcc -std=c99 crystalshift_layers.c -lm -o crystalshift_layers.exe
 ```
 
+## Shortly about implementation
+
 ## Usage
+I strongly recommend not to change the basis and create a supercell at the same time. When you change the basis, Crystal Shift does not write new atomic coordinates to the structure, while when you create a supercell, the new atomic positions are written and saved.
 
 ## Examples of usage
+### 1. Basis change
+![basis_change_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/basis_change.jpg)
+```bash
+> crystalshift
+Choose the option you need:
+1. Change basis of unit cell
+2. Edit atomic coordinates
+3. Converter CIF -> POSCAR
+4. Converter CIF -> xyz
+5. Converter POSCAR -> CIF
+6. Converter POSCAR -> xyz
+> 1
+Change basis of unit cell
+Please, choose the format of the input file: 
+1. CIF
+2. POSCAR
+>1
+Enter the path to the CIF file:
+> C:\cif_editor\VEWSIC.cif
+Enter the vectors of the basis transformation matrix.
+a vector:
+> 1
+> 0
+> 1
+b vector:
+> 0
+> 1
+> 0
+c vector:
+> 0
+> 0
+> 1
+Enter the path to save the new CIF file: 
+> C:\cif_editor\VEWSIC_edited.cif
+```
+
+### 2. Supercell generation
+![basis_change_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/supercell_generation.jpg)
+```bash
+> crystalshift
+Choose the option you need:
+1. Change basis of unit cell
+2. Edit atomic coordinates
+3. Converter CIF -> POSCAR
+4. Converter CIF -> xyz
+5. Converter POSCAR -> CIF
+6. Converter POSCAR -> xyz
+> 1
+Change basis of unit cell
+Please, choose the format of the input file: 
+1. CIF
+2. POSCAR
+>1
+Enter the path to the CIF file:
+> C:\cif_editor\VEWSIC.cif
+Enter the vectors of the basis transformation matrix.
+a vector:
+> 2
+> 0
+> 0
+b vector:
+> 0
+> 1
+> 0
+c vector:
+> 0
+> 0
+> 2
+Supercell detected. Do you want to add new atom coordinates in the supercell? (yes/no):
+> yes
+Supercell factors: [2, 1, 2]
+Original atom count: 100
+Updated atom count: 400
+Enter the path to save the new CIF file:
+> C:\cif_editor\VEWSIC_supercell.cif
+```
+
+### 3. Atomic coordinates editor
+
+### 4. Converters
+```bash
+> crystalshift
+Choose the option you need:
+1. Change basis of unit cell
+2. Edit atomic coordinates
+3. Converter CIF -> POSCAR
+4. Converter CIF -> xyz
+5. Converter POSCAR -> CIF
+6. Converter POSCAR -> xyz
+> 3
+Enter the path to the CIF file:
+> C:\cif_editor\VEWSIC.cif
+Choose the order for writing atoms to POSCAR:
+1. From lightest to heaviest;
+2. From heaviest to lightest;
+3. Custom order (input symbols separated by spaces).
+Enter your choice:
+> 1
+Enter the path to the POSCAR file:
+> C:\cif_editor\VEWSIC_POSCAR_1
+```
+For custom order of atoms:
+```bash
+Enter your choice:
+> 3
+Enter custom order:
+> H C O Br
+Enter the path to the POSCAR file:
+> C:\cif_editor\VEWSIC_POSCAR_3
+```
 
 ## Requirements
+Main CrystalShift modules require only standard C libraries.
 
 ## License
 This project is licensed under the GNU General Public License, Ver. 3 - see the LICENSE.md file for details.
 
 ## Contact information
 Email: i.isupova@g.nsu.ru
+
 Github: @shes73
+
 Telegram: @shes73
