@@ -137,6 +137,8 @@ Enter the path to save the new CIF file:
 ### 4. Converters
 ![CIF to POSCAR example](https://github.com/shes73/CrystalShift/blob/main/images/format_converter_example.jpg)
 ![CIF to POSCAR example](https://github.com/shes73/CrystalShift/blob/main/images/cif_poscar_xyz.jpg)
+
+#### 1. CIF to POSCAR converter
 ```bash
 > crystalshift
 Choose the option you need:
@@ -168,7 +170,7 @@ Enter custom order:
 Enter the path to the POSCAR file:
 > C:\cif_editor\VEWSIC_POSCAR_3
 ```
-
+#### 2. CIF to xyz converter
 ```bash
 > crystalshift
 Choose the option you need:
