@@ -21,6 +21,13 @@ gcc -std=c99 crystalshift_layers.c -lm -o crystalshift_layers.exe
 ```
 
 ## Shortly about implementation
+Let's have a close look at each module. Here are listed modules source files with their features and some points of work.
+
+***structures.c*** is the prime source file of the program. Structures with all information about crystal lattice and atoms is located there. When you run any of the modules: converters, basis changer or coordinate editor, it will definitely write information during parsing into structures, update it, save it in a new file.
+
+***atomic_coords_editor.c*** is module for editing atomic coordinates by adding a vector (x, y, z coordinates) that will be simply added to the coordinates of all atoms in the file.
+
+***FORMAT_parser.c*** are source files for reading and writing all information about lattice and atoms into structures in *structure.c*. In case of POSCAR and xyz formats everything seems to be easy, but CIF files can be varied and even creative.  
 
 ## Usage
 I strongly recommend not to change the basis and create a supercell at the same time. When you change the basis, Crystal Shift does not write new atomic coordinates to the structure, while when you create a supercell, the new atomic positions are written and saved.
