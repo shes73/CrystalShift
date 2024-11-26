@@ -104,7 +104,7 @@ Enter the path to save the new CIF file:
 ```
 
 ### 3. Atomic coordinates editor
-![atomic_coords_edition_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/atomic_coords_visualisation.jpg)
+![atomic_coords_edition_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/atomic_coords_edition_visualisation.jpg)
 ```bash
 Choose the option you need:
 1. Change basis of unit cell
