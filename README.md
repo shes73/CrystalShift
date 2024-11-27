@@ -36,7 +36,7 @@ Let's have a close look at each module. Here are listed modules source files wit
 ## Usage warnings
 - First of all, always check all input and output data. This applies not only to the CrystalShift, but in general to all programs. :)
 
-- I strongly recommend not to change the basis and create a supercell at the same time. When you change the basis, Crystal Shift does not write new atomic coordinates into the structure, whereas when you create a supercell, the new atomic positions are written and saved. In a small number of test cases, the basis change and supercell generation work well, but it has not been thoroughly tested yet.
+- I strongly recommend not to change the basis and create a supercell at the same time. When you change the basis, CrystalShift does not write new atomic coordinates into the structure, whereas when you create a supercell, the new atomic positions are written and saved. In a small number of test cases, the basis change and supercell generation work well, but it has not been thoroughly tested yet.
 
 - In the *cif_writer.c* file, a function has been implemented that removes duplicate atoms from the structure if there are any. This is an experimental feature that will be available for all formats in future versions.
 
