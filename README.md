@@ -137,7 +137,7 @@ Enter the path to save the new CIF file:
 ### 4. Converters
 ![CIF to POSCAR example](https://github.com/shes73/CrystalShift/blob/main/images/format_converter_example.jpg)
 ![CIF to POSCAR example](https://github.com/shes73/CrystalShift/blob/main/images/cif_poscar_xyz.jpg)
-*Images of moleculaes and lattices are generated via Mercury 3.10.3 for CIF files and Chemcraft 1.8 for POSCAR and xyz files.*
+*Images of molecules and lattices are generated via Mercury 3.10.3 for CIF files and Chemcraft 1.8 for POSCAR and xyz files.*
 
 #### 1. CIF to POSCAR converter
 ```bash
