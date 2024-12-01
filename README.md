@@ -38,7 +38,9 @@ Let's have a close look at each module. Here are listed modules source files wit
 
 - I strongly recommend not to change the basis and create a supercell at the same time. When you change the basis, CrystalShift does not write new atomic coordinates into the structure, whereas when you create a supercell, the new atomic positions are written and saved. In a small number of test cases, the basis change and supercell generation work well, but it has not been thoroughly tested yet.
 
-- In the *cif_writer.c* file, a function has been implemented that removes duplicate atoms from the structure if there are any. This is an experimental feature that will be available for all formats in future versions.
+- In the *FORMAT_writer.c* files, a function was implemented that warns the user and removes duplicate atoms from the structure if any exist.
+
+- CrystalShift writes POSCAR files only in Direct/Fractional format. The ability to write coordinates in Cartesian format will be added in a future update.
 
 ## Examples of usage
 ### 1. Basis change
@@ -201,6 +203,8 @@ Enter your choice:
 Enter the path to the xyz file:
 > C:\cif_editor\VEWSIC.xyz
 ```
+
+**You can find all input and output files with these examples in the folder *"tests/examples"*.**
 
 ## Requirements
 Main CrystalShift modules require only standard C libraries.
