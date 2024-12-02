@@ -85,6 +85,7 @@ void write_poscar(const char *filename, int sort_option, char **custom_order, in
             output_structure = normalized_structure_poscar;
         } else {
             printf("Duplicates not removed.\n");
+            free(normalized_structure_poscar.atoms);
         }
     }
 
@@ -138,6 +139,5 @@ void write_poscar(const char *filename, int sort_option, char **custom_order, in
     if (output_structure.atoms != structure.atoms) {
         free(output_structure.atoms); 
     }
-    free(normalized_structure_poscar.atoms);
     fclose(file);
 }
