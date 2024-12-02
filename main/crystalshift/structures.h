@@ -24,4 +24,9 @@ typedef struct {
 extern Structure structure;
 extern Element periodic_table[118];
 
+double normalize_coordinate(double coord);
+Structure create_normalized_structure(const Structure* original);
+int check_for_duplicates(const Structure* normalized);
+void remove_duplicate_atoms(Structure* original, const Structure* normalized);
+
 #endif

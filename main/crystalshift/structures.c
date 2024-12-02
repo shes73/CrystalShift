@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include "structures.h"
 
 Element periodic_table[118] = {
@@ -37,3 +41,61 @@ Element periodic_table[118] = {
 //     return -1; // Symbol not found
 // }
 
+double normalize_coordinate(double coord) {
+    return fmod(coord, 1.0);
+}
+
+// to check duplicates need to create normalized structure
+Structure create_normalized_structure(const Structure* original) {
+    Structure normalized;
+    normalized.atoms = malloc(sizeof(Atom) * original->atom_count);
+    normalized.atom_count = original->atom_count;
+
+    for (int i = 0; i < original->atom_count; i++) {
+        strcpy(normalized.atoms[i].element, original->atoms[i].element);
+        normalized.atoms[i].x = normalize_coordinate(original->atoms[i].x);
+        normalized.atoms[i].y = normalize_coordinate(original->atoms[i].y);
+        normalized.atoms[i].z = normalize_coordinate(original->atoms[i].z);
+    }
+
+    return normalized;
+}
+
+int check_for_duplicates(const Structure* normalized) {
+    for (int i = 0; i < normalized->atom_count; i++) {
+        for (int j = i + 1; j < normalized->atom_count; j++) {
+            if (strcmp(normalized->atoms[i].element, normalized->atoms[j].element) == 0 &&
+                fabs(normalize_coordinate(normalized->atoms[i].x) - normalize_coordinate(normalized->atoms[j].x)) < 1e-6 &&
+                fabs(normalize_coordinate(normalized->atoms[i].y) - normalize_coordinate(normalized->atoms[j].y)) < 1e-6 &&
+                fabs(normalize_coordinate(normalized->atoms[i].z) - normalize_coordinate(normalized->atoms[j].z)) < 1e-6) {
+                return 1; // there are duplicates
+            }
+        }
+    }
+    return 0; // there are no duplicates
+}
+
+void remove_duplicate_atoms(Structure* original, const Structure* normalized) {
+    int new_atom_count = 0;
+    Atom* unique_atoms = malloc(sizeof(Atom) * original->atom_count);
+
+    for (int i = 0; i < normalized->atom_count; i++) {
+        int is_duplicate = 0;
+        for (int j = 0; j < new_atom_count; j++) {
+            if (strcmp(normalized->atoms[i].element, unique_atoms[j].element) == 0 &&
+                fabs(normalize_coordinate(normalized->atoms[i].x) - normalize_coordinate(unique_atoms[j].x)) < 1e-6 &&
+                fabs(normalize_coordinate(normalized->atoms[i].y) - normalize_coordinate(unique_atoms[j].y)) < 1e-6 &&
+                fabs(normalize_coordinate(normalized->atoms[i].z) - normalize_coordinate(unique_atoms[j].z)) < 1e-6) {
+                is_duplicate = 1;
+                break;
+            }
+        }
+        if (!is_duplicate) {
+            unique_atoms[new_atom_count++] = original->atoms[i];
+        }
+    }
+
+    free(original->atoms);
+    original->atoms = unique_atoms;
+    original->atom_count = new_atom_count;
+}

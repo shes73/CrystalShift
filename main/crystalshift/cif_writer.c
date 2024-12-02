@@ -7,28 +7,6 @@
 
 #define M_PI 3.14159265358979323846
 
-void remove_duplicate_atoms() {
-    int new_atom_count = 0;
-    for (int i = 0; i < structure.atom_count; i++) {
-        int is_duplicate = 0;
-        for (int j = 0; j < new_atom_count; j++) {
-            if (strcmp(structure.atoms[i].element, structure.atoms[j].element) == 0 &&
-                structure.atoms[i].x == structure.atoms[j].x &&
-                structure.atoms[i].y == structure.atoms[j].y &&
-                structure.atoms[i].z == structure.atoms[j].z) {
-                is_duplicate = 1;
-                break;
-            }
-        }
-        if (!is_duplicate) {
-            structure.atoms[new_atom_count] = structure.atoms[i];
-            new_atom_count++;
-        }
-    }
-    structure.atom_count = new_atom_count;
-    structure.atoms = realloc(structure.atoms, sizeof(Atom) * new_atom_count);
-}
-
 void write_cif(const char *filename) {
     FILE *file = fopen(filename, "w");
     if (!file) {
@@ -64,7 +42,20 @@ void write_cif(const char *filename) {
     fprintf(file, "_atom_site_fract_y\n");
     fprintf(file, "_atom_site_fract_z\n");
 
-    remove_duplicate_atoms();
+    Structure normalized_structure_cif = create_normalized_structure(&structure);
+
+    if (check_for_duplicates(&normalized_structure_cif)) {
+        printf("Warning: duplicate coordinates found!\n");
+        char response_cif[10];
+        printf("Do you want to remove duplicates? (yes/no): ");
+        scanf("%3s", response_cif);
+        if (strcmp(response_cif, "yes") == 0) {
+            remove_duplicate_atoms(&structure, &normalized_structure_cif);
+            printf("Duplicates removed.\n");
+        } else {
+            printf("Duplicates not removed.\n");
+        }
+    }
 
     for (int i = 0; i < structure.atom_count; i++) {
         fprintf(file, "%s%d %s %lf %lf %lf\n", structure.atoms[i].element, i+1, structure.atoms[i].element, structure.atoms[i].x, structure.atoms[i].y, structure.atoms[i].z);

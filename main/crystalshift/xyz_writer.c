@@ -7,8 +7,6 @@
 
 #define M_PI 3.14159265358979323846
 
-Structure structure;
-
 int write_xyz(const char *filename, const Structure *structure, int xyz_format) {
     FILE *file = fopen(filename, "w");
     if (!file) {
@@ -26,6 +24,14 @@ int write_xyz(const char *filename, const Structure *structure, int xyz_format) 
                 structure->lattice[1][0], structure->lattice[1][1], structure->lattice[1][2],
                 structure->lattice[2][0], structure->lattice[2][1], structure->lattice[2][2]);
     }
+
+    Structure normalized_structure_xyz = create_normalized_structure(structure);
+
+    if (check_for_duplicates(&normalized_structure_xyz)) {
+        printf("Warning: duplicate coordinates found! Please, check it manually.\n");
+    }
+
+    free(normalized_structure_xyz.atoms);
 
     for (int i = 0; i < structure->atom_count; i++) {
         double x = structure->atoms[i].x * structure->lattice[0][0] +

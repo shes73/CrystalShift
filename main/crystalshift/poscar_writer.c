@@ -65,10 +65,33 @@ void write_poscar(const char *filename, int sort_option, char **custom_order, in
         fprintf(file, "\n");
     }
 
+    Structure output_structure = structure;
+    Structure normalized_structure_poscar = create_normalized_structure(&structure);
+
+    if (check_for_duplicates(&normalized_structure_poscar)) {
+        printf("Warning: duplicate coordinates found!\n");
+        char response_poscar[10];
+        printf("Do you want to remove duplicates? (yes/no): ");
+        scanf("%3s", response_poscar);
+
+        if (strcmp(response_poscar, "yes") == 0) {
+            remove_duplicate_atoms(&structure, &normalized_structure_poscar);
+            printf("Duplicates removed.\n");
+
+            Structure updated_normalized_structure = create_normalized_structure(&structure);
+            free(normalized_structure_poscar.atoms);
+            normalized_structure_poscar = updated_normalized_structure;
+
+            output_structure = normalized_structure_poscar;
+        } else {
+            printf("Duplicates not removed.\n");
+        }
+    }
+
     if (sort_option == 1) {
-        qsort(structure.atoms, structure.atom_count, sizeof(Atom), compare_atoms_asc);
+        qsort(output_structure.atoms, output_structure.atom_count, sizeof(Atom), compare_atoms_asc);
     } else if (sort_option == 2) {
-        qsort(structure.atoms, structure.atom_count, sizeof(Atom), compare_atoms_desc);
+        qsort(output_structure.atoms, output_structure.atom_count, sizeof(Atom), compare_atoms_desc);
     } else if (sort_option == 3 && custom_count > 0) {
         sort_atoms_custom(custom_order, custom_count);
     }
@@ -77,17 +100,17 @@ void write_poscar(const char *filename, int sort_option, char **custom_order, in
     int counts[256] = {0};
     int unique_count = 0;
 
-    for (int i = 0; i < structure.atom_count; i++) {
+    for (int i = 0; i < output_structure.atom_count; i++) {
         int found = 0;
         for (int j = 0; j < unique_count; j++) {
-            if (strncmp(structure.atoms[i].element, unique_elements[j], 2) == 0) {
+            if (strncmp(output_structure.atoms[i].element, unique_elements[j], 2) == 0) {
                 counts[j]++;
                 found = 1;
                 break;
             }
         }
         if (!found) {
-            strcpy(unique_elements[unique_count], structure.atoms[i].element);
+            strcpy(unique_elements[unique_count], output_structure.atoms[i].element);
             counts[unique_count] = 1;
             unique_count++;
         }
@@ -102,14 +125,19 @@ void write_poscar(const char *filename, int sort_option, char **custom_order, in
         fprintf(file, "%d ", counts[i]);
     }
     fprintf(file, "\n");
+
     fprintf(file, "Direct\n");
 
-    for (int i = 0; i < structure.atom_count; i++) {
+    for (int i = 0; i < output_structure.atom_count; i++) {
         fprintf(file, "%*.*f %*.*f %*.*f\n",
-                field_width, 15, structure.atoms[i].x,
-                field_width, 15, structure.atoms[i].y,
-                field_width, 15, structure.atoms[i].z);
+                field_width, 15, output_structure.atoms[i].x,
+                field_width, 15, output_structure.atoms[i].y,
+                field_width, 15, output_structure.atoms[i].z);
     }
 
+    if (output_structure.atoms != structure.atoms) {
+        free(output_structure.atoms); 
+    }
+    free(normalized_structure_poscar.atoms);
     fclose(file);
 }
