@@ -43,7 +43,7 @@ Element periodic_table[118] = {
 
 double normalize_coordinate(double coord) {
     if (coord < 0.0) {
-        coord = -coord; 
+        coord += 50.0; 
         return fmod(coord, 1.0);
     } else return fmod(coord, 1.0);
 }
