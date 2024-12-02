@@ -1,5 +1,6 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Werror
+CFLAGS=-Wall -Wextra -Werror -std=c99
+LDFLAGS=-lm
 
 TARGET = crystalshift
 
@@ -9,9 +10,16 @@ OBJ = $(SRC:.c=.o)
 
 .PHONY: all clean rebuild
 
-all: gcc $(FLAGS) -std=c99 $(SRC) -lm -o $(TARGET)
+all: $(TARGET)
 
-clean: all
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) $(LDFLAGS) -o $(TARGET)
+
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
 	rm -f $(OBJ) $(TARGET)
 
 rebuild: clean all
+
