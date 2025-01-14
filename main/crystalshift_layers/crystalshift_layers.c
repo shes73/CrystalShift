@@ -537,7 +537,6 @@ void find_closest_planes(double direction[3], double reciprocal_lattice[3][3], i
     miller_indices[2] = closest_indices[2];
 }
 
-// Function to calculate distance between two atoms
 double atom_distance(Atom a1, Atom a2) {
     return sqrt(pow(a1.x - a2.x, 2) + pow(a1.y - a2.y, 2) + pow(a1.z - a2.z, 2));
 }
@@ -719,7 +718,6 @@ void analyze_molecular_layers(Atom* atoms, int n, int* labels, int num_clusters)
     power_iteration(cov, 3, eigenvalues + 1, eigenvectors[1], 1000, 1e-6);
     power_iteration(cov, 3, eigenvalues + 2, eigenvectors[2], 1000, 1e-6);
 
-    // Calculate the reciprocal lattice vectors
     double reciprocal_lattice[3][3];
     calculate_reciprocal_lattice(structure.lattice, reciprocal_lattice);
 
@@ -1057,7 +1055,6 @@ int main() {
         return 1;
     }
 
-    // Redirect stdout to the output file
     if (freopen("output.txt", "w", stdout) == NULL) {
         fprintf(stderr, "Error redirecting stdout to file!\n");
         fclose(output_file);
