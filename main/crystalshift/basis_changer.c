@@ -22,11 +22,22 @@ void get_the_transformation_matrix(double transformation_matrix[3][3]) {
     }
 }
 
+void swap_rows(double matrix[3][3], double inverse[3][3], int row1, int row2) {
+    for (int j = 0; j < 3; j++) {
+        double temp = matrix[row1][j];
+        matrix[row1][j] = matrix[row2][j];
+        matrix[row2][j] = temp;
+        
+        temp = inverse[row1][j];
+        inverse[row1][j] = inverse[row2][j];
+        inverse[row2][j] = temp;
+    }
+}
+
 void inverse_transformation_matrix(double transformation_matrix[3][3], double inversed_transformation_matrix[3][3]) {
     double temporary_matrix[3][3];
     double ratio;
 
-    // initialization of all matrices before Gauss-Jordan inversion
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             inversed_transformation_matrix[i][j] = (i == j) ? 1.0 : 0.0;
@@ -34,17 +45,25 @@ void inverse_transformation_matrix(double transformation_matrix[3][3], double in
         }
     }
 
-    // reducing a matrix to upper triangular form
     for (int i = 0; i < 3; i++) {
         if (temporary_matrix[i][i] == 0.0) {
-            printf("Matrix is singular and cannot be inverted.\n");
-            exit(EXIT_FAILURE);
+            int found = 0;
+            for (int j = i + 1; j < 3; j++) {
+                if (temporary_matrix[j][i] != 0.0) {
+                    swap_rows(temporary_matrix, inversed_transformation_matrix, i, j);
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) {
+                printf("Matrix is singular and cannot be inverted.\n");
+                exit(EXIT_FAILURE);
+            }
         }
 
         for (int j = 0; j < 3; j++) {
             if (i != j) {
                 ratio = temporary_matrix[j][i] / temporary_matrix[i][i];
-
                 for (int k = 0; k < 3; k++) {
                     temporary_matrix[j][k] -= ratio * temporary_matrix[i][k];
                     inversed_transformation_matrix[j][k] -= ratio * inversed_transformation_matrix[i][k];
@@ -53,7 +72,6 @@ void inverse_transformation_matrix(double transformation_matrix[3][3], double in
         }
     }
 
-    // reducing a matrix to E
     for (int i = 0; i < 3; i++) {
         ratio = temporary_matrix[i][i];
         for (int j = 0; j < 3; j++) {
