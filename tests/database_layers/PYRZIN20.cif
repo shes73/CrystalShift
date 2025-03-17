@@ -1,0 +1,68 @@
+
+#######################################################################
+#
+#                 Cambridge Crystallographic Data Centre
+#                                CCDC 
+#
+#######################################################################
+#
+# If this CIF has been generated from an entry in the Cambridge 
+# Structural Database, then it will include bibliographic, chemical, 
+# crystal, experimental, refinement or atomic coordinate data resulting 
+# from the CCDC's data processing and validation procedures.
+#
+#######################################################################
+
+data_PYRZIN20
+_symmetry_cell_setting           monoclinic
+_symmetry_space_group_name_H-M   'P c'
+_symmetry_Int_Tables_number      7
+_space_group_name_Hall           'P -2yc'
+loop_
+_symmetry_equiv_pos_site_id
+_symmetry_equiv_pos_as_xyz
+1 x,y,z
+2 x,-y,1/2+z
+_cell_length_a                   7.170(3)
+_cell_length_b                   3.6477(15)
+_cell_length_c                   10.648(4)
+_cell_angle_alpha                90
+_cell_angle_beta                 106.350(6)
+_cell_angle_gamma                90
+_cell_volume                     267.226
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+C1 C 0.7476(7) 0.3536(14) 0.6735(4)
+N1 N 0.8102(6) 0.2190(11) 0.5783(4)
+C2 C 1.1110(8) 0.1445(13) 0.7459(5)
+H1 H 1.2429 0.0683 0.7668
+N2 N 1.0476(6) 0.2773(12) 0.8404(4)
+O1 O 0.4739(5) 0.6307(10) 0.7178(3)
+C3 C 0.5343(7) 0.4964(12) 0.6337(4)
+C4 C 0.8559(7) 0.3874(14) 0.8020(5)
+H2 H 0.7983 0.4871 0.8647
+C5 C 0.9987(7) 0.1075(14) 0.6175(5)
+H3 H 1.0548 0.0014 0.5552
+N3 N 0.4406(7) 0.4508(14) 0.5094(4)
+H4 H 0.535(7) 0.373(13) 0.500(4)
+H5 H 0.333(8) 0.542(14) 0.486(4)
+C1 C 0.7476(7) 0.6464(14) 0.1735(4)
+N1 N 0.8102(6) 0.7810(11) 0.0783(4)
+C2 C 1.1110(8) 0.8555(13) 0.2459(5)
+H1 H 1.2429 0.9317 0.2668
+N2 N 1.0476(6) 0.7227(12) 0.3404(4)
+O1 O 0.4739(5) 0.3693(10) 0.2178(3)
+C3 C 0.5343(7) 0.5036(12) 0.1337(4)
+C4 C 0.8559(7) 0.6126(14) 0.3020(5)
+H2 H 0.7983 0.5129 0.3647
+C5 C 0.9987(7) 0.8925(14) 0.1175(5)
+H3 H 1.0548 0.9986 0.0552
+N3 N 0.4406(7) 0.5492(14) 0.0094(4)
+H4 H 0.535(7) 0.627(13) 0.000(4)
+H5 H 0.333(8) 0.458(14) -0.014(4)
+
+#END
