@@ -3,10 +3,11 @@
 #include <math.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define M_PI 3.14159265358979323846
-#define MIN_PTS 2 // min number of atoms in a molecule
-#define DIM 3 // dimensionality of the space
+#define MIN_PTS 2 // минимальное количество атомов в молекуле
+#define DIM 3 // размерность пространства
 
 typedef struct {
     char element[3];
@@ -25,6 +26,14 @@ typedef struct {
     char symbol[3];
     int atomic_number;
 } Element;
+
+typedef struct {
+    double x, y, z;
+} Vector3;
+
+typedef struct {
+    int h, k, l;
+} MillerIndex;
 
 Structure structure;
 
@@ -46,40 +55,40 @@ Element periodic_table[118] = {
     {"Rg", 111}, {"Cn", 112}, {"Nh", 113}, {"Fl", 114}, {"Mc", 115}, {"Lv", 116}, {"Ts", 117}, {"Og", 118}
 };
 
-// Typical bond lengths (slightly enlarged for common atomic combinations)
-const double bond_lengths[118][118] = {
-    [0][0] = 0.85, // H-H bond length
-    [0][5] = 1.35, // H-C bond length
-    [0][6] = 1.50, // H-N bond length
-    [0][7] = 1.11, // H-O bond length
-    [0][8] = 1.10, // H-F bond length
-    [0][16] = 1.30, // H-Cl bond length
-    [0][34] = 1.50, // H-Br bond length
-    [0][52] = 1.70, // H-I bond length
-    [5][0] = 1.35, // C-H bond length
-    [5][5] = 1.54, // C-C bond length
-    [5][6] = 2.10, // C-N bond length
-    [5][7] = 1.50, // C-O bond length
-    [5][8] = 1.34, // C-F bond length
-    [5][16] = 1.76, // C-Cl bond length
-    [5][34] = 1.93, // C-Br bond length
-    [5][15] = 2.55, // C-S bond length
-    [5][33] = 2.71, // C-Se bond length
-    [6][0] = 1.50, // N-H bond length
-    [6][6] = 1.75, // N-N bond length
-    [6][5] = 2.10, // N-C bond length
-    [6][7] = 1.90, // N-O bond length
-    [7][0] = 1.11, // O-H bond length
-    [7][5] = 1.50, // O-C bond length
-    [7][6] = 1.90, // O-N bond length
-    [7][7] = 1.55, // O-O bond length
-    [8][0] = 1.10, // F-H bond length
-    [8][5] = 1.34, // F-C bond length
-    [16][0] = 1.30, // Cl-H bond length
-    [16][5] = 1.76, // Cl-C bond length
-    [34][0] = 1.50, // Br-H bond length
-    [34][5] = 1.93, // Br-C bond length
-    [52][0] = 1.70, // I-H bond length
+// typical bond lengths (slightly increased for convinience)
+const double bond_lengths[119][119] = {
+    [1][1] = 0.85, // H-H bond length
+    [1][6] = 1.35, // H-C bond length
+    [1][7] = 1.50, // H-N bond length
+    [1][8] = 1.11, // H-O bond length
+    [1][9] = 1.10, // H-F bond length
+    [1][17] = 1.30, // H-Cl bond length
+    [1][35] = 1.50, // H-Br bond length
+    [1][53] = 1.70, // H-I bond length
+    [6][1] = 1.35, // C-H bond length
+    [6][6] = 1.54, // C-C bond length
+    [6][7] = 2.10, // C-N bond length
+    [6][8] = 1.50, // C-O bond length
+    [6][9] = 1.34, // C-F bond length
+    [6][17] = 1.76, // C-Cl bond length
+    [6][35] = 2.10, // C-Br bond length
+    [6][16] = 2.55, // C-S bond length
+    [6][34] = 2.71, // C-Se bond length
+    [7][1] = 1.50, // N-H bond length
+    [7][7] = 1.75, // N-N bond length
+    [7][6] = 2.10, // N-C bond length
+    [7][8] = 1.90, // N-O bond length
+    [8][1] = 1.11, // O-H bond length
+    [8][6] = 1.50, // O-C bond length
+    [8][7] = 1.90, // O-N bond length
+    [8][8] = 1.55, // O-O bond length
+    [9][1] = 1.10, // F-H bond length
+    [9][6] = 1.34, // F-C bond length
+    [17][1] = 1.30, // Cl-H bond length
+    [17][6] = 1.76, // Cl-C bond length
+    [35][1] = 1.50, // Br-H bond length
+    [35][6] = 2.10, // Br-C bond length
+    [53][1] = 1.70, // I-H bond length
 };
 
 int get_atomic_number(const char *symbol) {
@@ -199,72 +208,6 @@ void convert_fractional_to_direct() {
     }
 }
 
-void calculate_covariance_matrix(double **data, int rows, int cols, double **cov) {
-    for (int i = 0; i < cols; i++) {
-        for (int j = 0; j < cols; j++) {
-            cov[i][j] = 0.0;
-            for (int k = 0; k < rows; k++) {
-                cov[i][j] += data[k][i] * data[k][j];
-            }
-            cov[i][j] /= rows;
-        }
-    }
-}
-
-void transpose_matrix(double **matrix, int rows, int cols, double **transposed) {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            transposed[j][i] = matrix[i][j];
-        }
-    }
-}
-
-void power_iteration(double **matrix, int size, double *eigenvalue, double *eigenvector, int max_iterations, double tolerance) {
-    double *b_k = (double *)malloc(size * sizeof(double));
-    for (int i = 0; i < size; i++) {
-        b_k[i] = 1.0;
-    }
-
-    double *b_k1 = (double *)malloc(size * sizeof(double));
-    double norm;
-
-    for (int it = 0; it < max_iterations; it++) {
-        for (int i = 0; i < size; i++) {
-            b_k1[i] = 0;
-            for (int j = 0; j < size; j++) {
-                b_k1[i] += matrix[i][j] * b_k[j];
-            }
-        }
-
-        norm = 0.0;
-        for (int i = 0; i < size; i++) {
-            norm += b_k1[i] * b_k1[i];
-        }
-        norm = sqrt(norm);
-
-        for (int i = 0; i < size; i++) {
-            b_k[i] = b_k1[i] / norm;
-        }
-
-        *eigenvalue = 0;
-        for (int i = 0; i < size; i++) {
-            double temp = 0;
-            for (int j = 0; j < size; j++) {
-                temp += matrix[i][j] * b_k[j];
-            }
-            *eigenvalue += b_k[i] * temp;
-        }
-
-        if (norm < tolerance) {
-            break;
-        }
-    }
-
-    memcpy(eigenvector, b_k, size * sizeof(double));
-    free(b_k);
-    free(b_k1);
-}
-
 typedef struct KDNode {
     Atom atom;
     struct KDNode* left;
@@ -272,16 +215,29 @@ typedef struct KDNode {
 } KDNode;
 
 double distance(Atom a1, Atom a2) {
-    return sqrt(pow(a1.x - a2.x, 2) + pow(a1.y - a2.y, 2) + pow(a1.z - a2.z, 2));
+    double dx = a1.x - a2.x;
+    double dy = a1.y - a2.y;
+    double dz = a1.z - a2.z;
+
+    return sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 double get_bond_length(Atom a1, Atom a2) {
     int atomic_number1 = get_atomic_number(a1.element);
     int atomic_number2 = get_atomic_number(a2.element);
     if (atomic_number1 == -1 || atomic_number2 == -1) {
-        return 3.0; // default bond length if elements are not found
+        return 2.8; // default bond length if elements are not found
     }
-    return bond_lengths[atomic_number1][atomic_number2];
+
+    // check if the bond length is defined
+    if (bond_lengths[atomic_number1][atomic_number2] > 0) {
+        return bond_lengths[atomic_number1][atomic_number2];
+    }
+    if (bond_lengths[atomic_number2][atomic_number1] > 0) {
+        return bond_lengths[atomic_number2][atomic_number1];
+    }
+
+    return 2.8;
 }
 
 KDNode* createNode(Atom atom) {
@@ -310,7 +266,7 @@ KDNode* insert(KDNode* root, Atom atom, int depth) {
     return root;
 }
 
-void rangeSearch(KDNode* root, Atom target, double eps, int depth, Atom** neighbors, int* neighbor_count) {
+void rangeSearch(KDNode* root, Atom target, double eps, int depth, Atom** neighbors, int* neighbor_count, double lattice[3][3]) {
     if (root == NULL) return;
 
     if (distance(root->atom, target) < eps) {
@@ -321,16 +277,16 @@ void rangeSearch(KDNode* root, Atom target, double eps, int depth, Atom** neighb
     if ((cd == 0 && target.x - eps < root->atom.x) ||
         (cd == 1 && target.y - eps < root->atom.y) ||
         (cd == 2 && target.z - eps < root->atom.z)) {
-        rangeSearch(root->left, target, eps, depth + 1, neighbors, neighbor_count);
+        rangeSearch(root->left, target, eps, depth + 1, neighbors, neighbor_count, lattice);
     }
     if ((cd == 0 && target.x + eps >= root->atom.x) ||
         (cd == 1 && target.y + eps >= root->atom.y) ||
         (cd == 2 && target.z + eps >= root->atom.z)) {
-        rangeSearch(root->right, target, eps, depth + 1, neighbors, neighbor_count);
+        rangeSearch(root->right, target, eps, depth + 1, neighbors, neighbor_count, lattice);
     }
 }
 
-void expandCluster(Atom* atoms, int n, int* labels, int cluster_id, int index, KDNode* root) {
+void expandCluster(Atom* atoms, int n, int* labels, int cluster_id, int index, KDNode* root, double lattice[3][3]) {
     labels[index] = cluster_id;
 
     Atom* neighbors = (Atom*)malloc(n * sizeof(Atom));
@@ -340,46 +296,35 @@ void expandCluster(Atom* atoms, int n, int* labels, int cluster_id, int index, K
     }
 
     int neighbor_count = 0;
-    double eps = get_bond_length(atoms[index], atoms[index]);
-    rangeSearch(root, atoms[index], eps, 0, &neighbors, &neighbor_count);
+    rangeSearch(root, atoms[index], 3.5, 0, &neighbors, &neighbor_count, lattice);
 
     for (int i = 0; i < neighbor_count; i++) {
         int neighbor_index = -1;
         for (int j = 0; j < n; j++) {
             if (strcmp(atoms[j].element, neighbors[i].element) == 0 &&
-                atoms[j].x == neighbors[i].x &&
-                atoms[j].y == neighbors[i].y &&
-                atoms[j].z == neighbors[i].z) {
+                distance(atoms[j], neighbors[i]) < 0.01) { // Используем PBC-расстояние
                 neighbor_index = j;
                 break;
             }
         }
         if (neighbor_index == -1) continue;
 
-        if (labels[neighbor_index] == -1) {
-            labels[neighbor_index] = cluster_id;
-        }
-        if (labels[neighbor_index] == 0) {
-            labels[neighbor_index] = cluster_id;
-            Atom* new_neighbors = (Atom*)malloc(n * sizeof(Atom));
-            if (new_neighbors == NULL) {
-                fprintf(stderr, "Memory allocation failed for new_neighbors\n");
-                free(neighbors);
-                return;
+        double eps = get_bond_length(atoms[index], atoms[neighbor_index]);
+
+        if (distance(atoms[index], atoms[neighbor_index]) <= eps) {
+            if (labels[neighbor_index] == -1) {
+                labels[neighbor_index] = cluster_id;
             }
-            int new_neighbor_count = 0;
-            eps = get_bond_length(atoms[neighbor_index], atoms[neighbor_index]);
-            rangeSearch(root, atoms[neighbor_index], eps, 0, &new_neighbors, &new_neighbor_count);
-            if (new_neighbor_count >= MIN_PTS) {
-                expandCluster(atoms, n, labels, cluster_id, neighbor_index, root);
+            if (labels[neighbor_index] == 0) {
+                labels[neighbor_index] = cluster_id;
+                expandCluster(atoms, n, labels, cluster_id, neighbor_index, root, lattice);
             }
-            free(new_neighbors);
         }
     }
     free(neighbors);
 }
 
-void dbscan(Atom* atoms, int n, int* labels) {
+void dbscan(Atom* atoms, int n, int* labels, double lattice[3][3]) {
     KDNode* root = NULL;
     for (int i = 0; i < n; i++) {
         root = insert(root, atoms[i], 0);
@@ -396,17 +341,16 @@ void dbscan(Atom* atoms, int n, int* labels) {
         }
 
         int neighbor_count = 0;
-        double eps = get_bond_length(atoms[i], atoms[i]);
-        rangeSearch(root, atoms[i], eps, 0, &neighbors, &neighbor_count);
+        rangeSearch(root, atoms[i], 3.5, 0, &neighbors, &neighbor_count, lattice);
 
         if (neighbor_count < MIN_PTS) {
-            labels[i] = -1; // mark as noise -- probably the disorder
+            labels[i] = -1; // mark as noise
             free(neighbors);
             continue;
         }
 
         cluster_id++;
-        expandCluster(atoms, n, labels, cluster_id, i, root);
+        expandCluster(atoms, n, labels, cluster_id, i, root, lattice);
         free(neighbors);
     }
 }
@@ -439,607 +383,274 @@ void create_supercell(Structure* structure, int nx, int ny, int nz) {
     structure->atom_count = new_atom_count;
 }
 
-void calculate_molecule_boundaries(Atom* atoms, int n, int* labels, int cluster_id, double* min_coords, double* max_coords) {
-    min_coords[0] = min_coords[1] = min_coords[2] = INFINITY;
-    max_coords[0] = max_coords[1] = max_coords[2] = -INFINITY;
+void calculate_geometric_centers(Atom* atoms, int atom_count, int* cluster_labels, int cluster_count) {
+    printf("Geometric centers of clusters:\n");
 
-    for (int i = 0; i < n; i++) {
-        if (labels[i] == cluster_id) {
-            if (atoms[i].x < min_coords[0]) min_coords[0] = atoms[i].x;
-            if (atoms[i].y < min_coords[1]) min_coords[1] = atoms[i].y;
-            if (atoms[i].z < min_coords[2]) min_coords[2] = atoms[i].z;
-            if (atoms[i].x > max_coords[0]) max_coords[0] = atoms[i].x;
-            if (atoms[i].y > max_coords[1]) max_coords[1] = atoms[i].y;
-            if (atoms[i].z > max_coords[2]) max_coords[2] = atoms[i].z;
-        }
-    }
-}
-
-void calculate_center_of_mass(Atom* atoms, int n, int* labels, int cluster_id, double* com) {
-    com[0] = com[1] = com[2] = 0.0;
-    int count = 0;
-
-    for (int i = 0; i < n; i++) {
-        if (labels[i] == cluster_id) {
-            com[0] += atoms[i].x;
-            com[1] += atoms[i].y;
-            com[2] += atoms[i].z;
-            count++;
-        }
+    double** centers = (double**)malloc(cluster_count * sizeof(double*));
+    for (int i = 0; i < cluster_count; i++) {
+        centers[i] = (double*)malloc(3 * sizeof(double));
+        centers[i][0] = 0.0;
+        centers[i][1] = 0.0;
+        centers[i][2] = 0.0;
     }
 
-    com[0] /= count;
-    com[1] /= count;
-    com[2] /= count;
-}
+    for (int cluster_id = 1; cluster_id <= cluster_count; cluster_id++) {
+        int count = 0;
 
-double* projections; // Global variable to hold projections
-
-int compare_projections(const void* a, const void* b) {
-    int cluster_a = *(int*)a;
-    int cluster_b = *(int*)b;
-    double projection_a = projections[cluster_a - 1];
-    double projection_b = projections[cluster_b - 1];
-    if (projection_a < projection_b) {
-        return -1;
-    } else if (projection_a > projection_b) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-void calculate_reciprocal_lattice(double lattice[3][3], double reciprocal_lattice[3][3]) {
-    double volume = lattice[0][0] * (lattice[1][1] * lattice[2][2] - lattice[1][2] * lattice[2][1]) -
-                   lattice[0][1] * (lattice[1][0] * lattice[2][2] - lattice[1][2] * lattice[2][0]) +
-                   lattice[0][2] * (lattice[1][0] * lattice[2][1] - lattice[1][1] * lattice[2][0]);
-
-    reciprocal_lattice[0][0] = (lattice[1][1] * lattice[2][2] - lattice[1][2] * lattice[2][1]) / volume;
-    reciprocal_lattice[0][1] = (lattice[0][2] * lattice[2][1] - lattice[0][1] * lattice[2][2]) / volume;
-    reciprocal_lattice[0][2] = (lattice[0][1] * lattice[1][2] - lattice[0][2] * lattice[1][1]) / volume;
-
-    reciprocal_lattice[1][0] = (lattice[1][2] * lattice[2][0] - lattice[1][0] * lattice[2][2]) / volume;
-    reciprocal_lattice[1][1] = (lattice[0][0] * lattice[2][2] - lattice[0][2] * lattice[2][0]) / volume;
-    reciprocal_lattice[1][2] = (lattice[0][2] * lattice[1][0] - lattice[0][0] * lattice[1][2]) / volume;
-
-    reciprocal_lattice[2][0] = (lattice[1][0] * lattice[2][1] - lattice[1][1] * lattice[2][0]) / volume;
-    reciprocal_lattice[2][1] = (lattice[0][1] * lattice[2][0] - lattice[0][0] * lattice[2][1]) / volume;
-    reciprocal_lattice[2][2] = (lattice[0][0] * lattice[1][1] - lattice[0][1] * lattice[1][0]) / volume;
-}
-
-void find_closest_planes(double direction[3], double reciprocal_lattice[3][3], int miller_indices[3]) {
-    double min_distance = INFINITY;
-    int closest_indices[3] = {0, 0, 0};
-
-    for (int h = -1; h <= 1; h++) {
-        for (int k = -1; k <= 1; k++) {
-            for (int l = -1; l <= 1; l++) {
-                if (h == 0 && k == 0 && l == 0) continue;
-
-                double plane_normal[3] = {h * reciprocal_lattice[0][0] + k * reciprocal_lattice[1][0] + l * reciprocal_lattice[2][0],
-                                        h * reciprocal_lattice[0][1] + k * reciprocal_lattice[1][1] + l * reciprocal_lattice[2][1],
-                                        h * reciprocal_lattice[0][2] + k * reciprocal_lattice[1][2] + l * reciprocal_lattice[2][2]};
-
-                double distance = fabs(plane_normal[0] * direction[0] + plane_normal[1] * direction[1] + plane_normal[2] * direction[2]);
-
-                if (distance < min_distance) {
-                    min_distance = distance;
-                    closest_indices[0] = h;
-                    closest_indices[1] = k;
-                    closest_indices[2] = l;
-                }
+        for (int i = 0; i < atom_count; i++) {
+            if (cluster_labels[i] == cluster_id) {
+                centers[cluster_id - 1][0] += atoms[i].x;
+                centers[cluster_id - 1][1] += atoms[i].y;
+                centers[cluster_id - 1][2] += atoms[i].z;
+                count++;
             }
         }
+
+        if (count > 0) {
+            centers[cluster_id - 1][0] /= count;
+            centers[cluster_id - 1][1] /= count;
+            centers[cluster_id - 1][2] /= count;
+        }
+
+        printf("Cluster %d: Center (%.3f, %.3f, %.3f)\n", cluster_id, centers[cluster_id - 1][0], centers[cluster_id - 1][1], centers[cluster_id - 1][2]);
     }
 
-    miller_indices[0] = closest_indices[0];
-    miller_indices[1] = closest_indices[1];
-    miller_indices[2] = closest_indices[2];
+    for (int i = 0; i < cluster_count; i++) {
+        free(centers[i]);
+    }
+    free(centers);
 }
 
-double atom_distance(Atom a1, Atom a2) {
-    return sqrt(pow(a1.x - a2.x, 2) + pow(a1.y - a2.y, 2) + pow(a1.z - a2.z, 2));
+void calculate_cluster_covariance_matrix(Atom* atoms, int atom_count, int* cluster_labels, double lattice[3][3], double covariance_matrix[3][3]) {
+    double mean[3] = {0.0, 0.0, 0.0};
+    int total_atoms = 0;
+
+    for (int i = 0; i < atom_count; i++) {
+        if (cluster_labels[i] > 0) {
+            double wrapped_x = fmod(atoms[i].x, lattice[0][0]);
+            double wrapped_y = fmod(atoms[i].y, lattice[1][1]);
+            double wrapped_z = fmod(atoms[i].z, lattice[2][2]);
+
+            mean[0] += wrapped_x;
+            mean[1] += wrapped_y;
+            mean[2] += wrapped_z;
+            total_atoms++;
+        }
+    }
+
+    for (int i = 0; i < 3; i++) {
+        mean[i] /= total_atoms;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            covariance_matrix[i][j] = 0.0;
+            for (int k = 0; k < atom_count; k++) {
+                if (cluster_labels[k] > 0) {
+                    double wrapped_x = fmod(atoms[k].x, lattice[0][0]);
+                    double wrapped_y = fmod(atoms[k].y, lattice[1][1]);
+                    double wrapped_z = fmod(atoms[k].z, lattice[2][2]);
+
+                    double diff_i = (i == 0) ? wrapped_x - mean[0] : (i == 1) ? wrapped_y - mean[1] : wrapped_z - mean[2];
+                    double diff_j = (j == 0) ? wrapped_x - mean[0] : (j == 1) ? wrapped_y - mean[1] : wrapped_z - mean[2];
+
+                    covariance_matrix[i][j] += diff_i * diff_j;
+                }
+            }
+            covariance_matrix[i][j] /= total_atoms;
+        }
+    }
 }
 
-void find_nearest_molecules(Atom* atoms, int n, int* labels, int num_clusters, double** distances) {
+void power_iteration_matrix(double matrix[3][3], Vector3 *eigenvector, int max_iter, double tol) {
+    double v[3] = {1.0, 1.0, 1.0};
+    double norm, new_v[3];
+
+    for (int iter = 0; iter < max_iter; iter++) {
+        for (int i = 0; i < 3; i++) {
+            new_v[i] = 0.0;
+            for (int j = 0; j < 3; j++) {
+                new_v[i] += matrix[i][j] * v[j];
+            }
+        }
+        norm = sqrt(new_v[0] * new_v[0] + new_v[1] * new_v[1] + new_v[2] * new_v[2]);
+        for (int i = 0; i < 3; i++) {
+            new_v[i] /= norm;
+        }
+        double diff = fabs(new_v[0] - v[0]) + fabs(new_v[1] - v[1]) + fabs(new_v[2] - v[2]);
+        if (diff < tol) break;
+        memcpy(v, new_v, sizeof(v));
+    }
+    eigenvector->x = v[0];
+    eigenvector->y = v[1];
+    eigenvector->z = v[2];
+}
+
+void perform_pca(Atom* atoms, int atom_count, int* cluster_labels, Vector3* principal_axis, MillerIndex* hkl) {
+    double covariance_matrix[3][3] = {0};
+    calculate_cluster_covariance_matrix(atoms, atom_count, cluster_labels, structure.lattice, covariance_matrix);
+
+    power_iteration_matrix(covariance_matrix, principal_axis, 100, 1e-6);
+
+    printf("Principal Axis: (%.3f, %.3f, %.3f)\n", principal_axis->x, principal_axis->y, principal_axis->z);
+
+    // calculate the slip plane (hkl)
+    double norm = sqrt(principal_axis->x * principal_axis->x + principal_axis->y * principal_axis->y + principal_axis->z * principal_axis->z);
+    hkl->h = round(principal_axis->x / norm * 10);
+    hkl->k = round(principal_axis->y / norm * 10);
+    hkl->l = round(principal_axis->z / norm * 10);
+
+    printf("Slip Plane (hkl): (%d, %d, %d)\n", hkl->h, hkl->k, hkl->l);
+}
+
+void integrate_pca_with_structure(Structure *structure, int *cluster_labels) {
+    Vector3 principal_axis;
+    MillerIndex hkl;
+    perform_pca(structure->atoms, structure->atom_count, cluster_labels, &principal_axis, &hkl);
+}
+
+bool validate_layer(int* cluster_labels, int num_clusters, Structure* structure, Vector3 principal_axis) {
+    if (num_clusters < 3) {
+        printf("Validation failed: Less than 3 clusters in the layer.\n");
+        return false;
+    }
+
+    // calculate geometric centers of clusters
+    Vector3* centers = (Vector3*)malloc(num_clusters * sizeof(Vector3));
+    int* counts = (int*)calloc(num_clusters, sizeof(int));
+
+    for (int i = 0; i < num_clusters; i++) {
+        centers[i].x = centers[i].y = centers[i].z = 0.0;
+    }
+
+    for (int i = 0; i < structure->atom_count; i++) {
+        int cluster_id = cluster_labels[i] - 1;
+        if (cluster_id >= 0) {
+            centers[cluster_id].x += structure->atoms[i].x;
+            centers[cluster_id].y += structure->atoms[i].y;
+            centers[cluster_id].z += structure->atoms[i].z;
+            counts[cluster_id]++;
+        }
+    }
+
+    for (int i = 0; i < num_clusters; i++) {
+        if (counts[i] > 0) {
+            centers[i].x /= counts[i];
+            centers[i].y /= counts[i];
+            centers[i].z /= counts[i];
+        }
+    }
+
+    // calculate intra-layer and inter-layer distances
+    double intra_layer_dist = 0.0, inter_layer_dist = 1e6;
+    int intra_count = 0, inter_count = 0;
+
     for (int i = 0; i < num_clusters; i++) {
         for (int j = i + 1; j < num_clusters; j++) {
-            double min_distance = INFINITY;
-            for (int k = 0; k < n; k++) {
-                if (labels[k] == i) {
-                    for (int l = 0; l < n; l++) {
-                        if (labels[l] == j) {
-                            double dist = atom_distance(atoms[k], atoms[l]);
-                            if (dist < min_distance) {
-                                min_distance = dist;
-                            }
-                        }
-                    }
-                }
+            double dx = centers[i].x - centers[j].x;
+            double dy = centers[i].y - centers[j].y;
+            double dz = centers[i].z - centers[j].z;
+
+            // project the distance vector onto the principal axis
+            double projected_dist = fabs(dx * principal_axis.x + dy * principal_axis.y + dz * principal_axis.z);
+
+            if (projected_dist < 5.0) { // threshold for intra-layer distance
+                intra_layer_dist += sqrt(dx * dx + dy * dy + dz * dz);
+                intra_count++;
+            } else {
+                inter_layer_dist = fmin(inter_layer_dist, sqrt(dx * dx + dy * dy + dz * dz));
+                inter_count++;
             }
-            distances[i][j] = min_distance;
-            distances[j][i] = min_distance;
         }
     }
+
+    if (intra_count > 0 && inter_count > 0 && intra_layer_dist / intra_count >= inter_layer_dist) {
+        printf("Validation failed: Intra-layer distances are not smaller than inter-layer distances.\n");
+        free(centers);
+        free(counts);
+        return false;
+    }
+
+    // check R^2 of fitted centers in a line
+    double mean_x = 0, mean_y = 0, mean_z = 0;
+    for (int i = 0; i < num_clusters; i++) {
+        mean_x += centers[i].x;
+        mean_y += centers[i].y;
+        mean_z += centers[i].z;
+    }
+    mean_x /= num_clusters;
+    mean_y /= num_clusters;
+    mean_z /= num_clusters;
+
+    double ss_total = 0, ss_residual = 0;
+    for (int i = 0; i < num_clusters; i++) {
+        double proj = (centers[i].x - mean_x) * principal_axis.x +
+                      (centers[i].y - mean_y) * principal_axis.y +
+                      (centers[i].z - mean_z) * principal_axis.z;
+        double predicted_x = mean_x + proj * principal_axis.x;
+        double predicted_y = mean_y + proj * principal_axis.y;
+        double predicted_z = mean_z + proj * principal_axis.z;
+
+        double error_x = centers[i].x - predicted_x;
+        double error_y = centers[i].y - predicted_y;
+        double error_z = centers[i].z - predicted_z;
+        ss_residual += error_x * error_x + error_y * error_y + error_z * error_z;
+
+        double deviation_x = centers[i].x - mean_x;
+        double deviation_y = centers[i].y - mean_y;
+        double deviation_z = centers[i].z - mean_z;
+        ss_total += deviation_x * deviation_x + deviation_y * deviation_y + deviation_z * deviation_z;
+    }
+
+    double r_squared = 1 - (ss_residual / ss_total);
+    if (r_squared < 0.8) {
+        printf("Validation failed: R^2 is below 0.8 (%.3f).\n", r_squared);
+        free(centers);
+        free(counts);
+        return false;
+    }
+
+    free(centers);
+    free(counts);
+    return true;
 }
 
-void analyze_molecular_layers(Atom* atoms, int n, int* labels, int num_clusters) {
-    if (num_clusters <= 0) {
-        fprintf(stderr, "Invalid number of clusters: %d\n", num_clusters);
-        return;
+bool try_alternative_layer_directions(int* cluster_labels, int num_clusters, Structure* structure) {
+    double covariance_matrix[DIM][DIM];
+    calculate_cluster_covariance_matrix(structure->atoms, structure->atom_count, cluster_labels, structure->lattice, covariance_matrix);
+
+    Vector3 eigenvectors[DIM];
+    for (int i = 0; i < DIM; i++) {
+        power_iteration_matrix(covariance_matrix, &eigenvectors[i], 100, 1e-6);
+
+        // orthogonalize the eigenvector to the previous ones
+        for (int j = 0; j < i; j++) {
+            double dot_product = eigenvectors[i].x * eigenvectors[j].x +
+                                  eigenvectors[i].y * eigenvectors[j].y +
+                                  eigenvectors[i].z * eigenvectors[j].z;
+            eigenvectors[i].x -= dot_product * eigenvectors[j].x;
+            eigenvectors[i].y -= dot_product * eigenvectors[j].y;
+            eigenvectors[i].z -= dot_product * eigenvectors[j].z;
+        }
+
+        // normalize the eigenvector
+        double norm = sqrt(eigenvectors[i].x * eigenvectors[i].x +
+                            eigenvectors[i].y * eigenvectors[i].y +
+                            eigenvectors[i].z * eigenvectors[i].z);
+        eigenvectors[i].x /= norm;
+        eigenvectors[i].y /= norm;
+        eigenvectors[i].z /= norm;
     }
 
-    double* coms = (double*)malloc(num_clusters * 3 * sizeof(double));
-    if (coms == NULL) {
-        fprintf(stderr, "Memory allocation failed for coms\n");
-        return;
-    }
+    for (int i = 0; i < DIM; i++) {
+        Vector3 principal_axis = eigenvectors[i];
+        printf("Attempt %d: Using eigenvector %d as the principal axis\n", i + 1, i + 1);
 
-    for (int i = 0; i < num_clusters; i++) {
-        calculate_center_of_mass(atoms, n, labels, i + 1, &coms[i * 3]);
-    }
-
-    double** data = (double**)malloc(3 * sizeof(double*));
-    if (data == NULL) {
-        fprintf(stderr, "Memory allocation failed for data\n");
-        free(coms);
-        return;
-    }
-    for (int i = 0; i < 3; i++) {
-        data[i] = (double*)malloc(num_clusters * sizeof(double));
-        if (data[i] == NULL) {
-            fprintf(stderr, "Memory allocation failed for data[%d]\n", i);
-            free(coms);
-            for (int j = 0; j < i; j++) {
-                free(data[j]);
-            }
-            free(data);
-            return;
+        if (validate_layer(cluster_labels, num_clusters, structure, principal_axis)) {
+            return true;
         }
     }
-
-    for (int i = 0; i < num_clusters; i++) {
-        data[0][i] = coms[i * 3];
-        data[1][i] = coms[i * 3 + 1];
-        data[2][i] = coms[i * 3 + 2];
-    }
-
-    double** data_t = (double**)malloc(num_clusters * sizeof(double*));
-    if (data_t == NULL) {
-        fprintf(stderr, "Memory allocation failed for data_t\n");
-        free(coms);
-        for (int i = 0; i < 3; i++) {
-            free(data[i]);
-        }
-        free(data);
-        return;
-    }
-    for (int i = 0; i < num_clusters; i++) {
-        data_t[i] = (double*)malloc(3 * sizeof(double));
-        if (data_t[i] == NULL) {
-            fprintf(stderr, "Memory allocation failed for data_t[%d]\n", i);
-            free(coms);
-            for (int j = 0; j < 3; j++) {
-                free(data[j]);
-            }
-            free(data);
-            for (int j = 0; j < i; j++) {
-                free(data_t[j]);
-            }
-            free(data_t);
-            return;
-        }
-    }
-
-    transpose_matrix(data, 3, num_clusters, data_t);
-
-    double** cov = (double**)malloc(3 * sizeof(double*));
-    if (cov == NULL) {
-        fprintf(stderr, "Memory allocation failed for cov\n");
-        free(coms);
-        for (int i = 0; i < 3; i++) {
-            free(data[i]);
-        }
-        free(data);
-        for (int i = 0; i < num_clusters; i++) {
-            free(data_t[i]);
-        }
-        free(data_t);
-        return;
-    }
-    for (int i = 0; i < 3; i++) {
-        cov[i] = (double*)malloc(3 * sizeof(double));
-        if (cov[i] == NULL) {
-            fprintf(stderr, "Memory allocation failed for cov[%d]\n", i);
-            free(coms);
-            for (int j = 0; j < 3; j++) {
-                free(data[j]);
-            }
-            free(data);
-            for (int j = 0; j < num_clusters; j++) {
-                free(data_t[j]);
-            }
-            free(data_t);
-            for (int j = 0; j < i; j++) {
-                free(cov[j]);
-            }
-            free(cov);
-            return;
-        }
-    }
-
-    calculate_covariance_matrix(data_t, num_clusters, 3, cov);
-
-    double eigenvalues[3];
-    double **eigenvectors = (double**)malloc(3 * sizeof(double*));
-    if (eigenvectors == NULL) {
-        fprintf(stderr, "Memory allocation failed for eigenvectors\n");
-        free(coms);
-        for (int i = 0; i < 3; i++) {
-            free(data[i]);
-        }
-        free(data);
-        for (int i = 0; i < num_clusters; i++) {
-            free(data_t[i]);
-        }
-        free(data_t);
-        for (int i = 0; i < 3; i++) {
-            free(cov[i]);
-        }
-        free(cov);
-        return;
-    }
-    for (int i = 0; i < 3; i++) {
-        eigenvectors[i] = (double*)malloc(3 * sizeof(double));
-        if (eigenvectors[i] == NULL) {
-            fprintf(stderr, "Memory allocation failed for eigenvectors[%d]\n", i);
-            free(coms);
-            for (int j = 0; j < 3; j++) {
-                free(data[j]);
-            }
-            free(data);
-            for (int j = 0; j < num_clusters; j++) {
-                free(data_t[j]);
-            }
-            free(data_t);
-            for (int j = 0; j < 3; j++) {
-                free(cov[j]);
-            }
-            free(cov);
-            for (int j = 0; j < i; j++) {
-                free(eigenvectors[j]);
-            }
-            free(eigenvectors);
-            return;
-        }
-    }
-
-    power_iteration(cov, 3, eigenvalues, eigenvectors[0], 1000, 1e-6);
-    power_iteration(cov, 3, eigenvalues + 1, eigenvectors[1], 1000, 1e-6);
-    power_iteration(cov, 3, eigenvalues + 2, eigenvectors[2], 1000, 1e-6);
-
-    double reciprocal_lattice[3][3];
-    calculate_reciprocal_lattice(structure.lattice, reciprocal_lattice);
-
-    // Find the closest planes to the direction vectors
-    int miller_indices[3][3];
-    find_closest_planes(eigenvectors[0], reciprocal_lattice, miller_indices[0]);
-    find_closest_planes(eigenvectors[1], reciprocal_lattice, miller_indices[1]);
-    find_closest_planes(eigenvectors[2], reciprocal_lattice, miller_indices[2]);
-
-    for (int i = 0; i < 3; i++) {
-        fprintf(stdout, "Miller indices of the layer plane %d: (%d, %d, %d)\n", i + 1, miller_indices[i][0], miller_indices[i][1], miller_indices[i][2]);
-    }
-
-    // Project the centers of mass onto the direction vectors
-    projections = (double*)malloc(num_clusters * sizeof(double));
-    if (projections == NULL) {
-        fprintf(stderr, "Memory allocation failed for projections\n");
-        free(coms);
-        for (int i = 0; i < 3; i++) {
-            free(data[i]);
-        }
-        free(data);
-        for (int i = 0; i < num_clusters; i++) {
-            free(data_t[i]);
-        }
-        free(data_t);
-        for (int i = 0; i < 3; i++) {
-            free(cov[i]);
-        }
-        free(cov);
-        for (int i = 0; i < 3; i++) {
-            free(eigenvectors[i]);
-        }
-        free(eigenvectors);
-        return;
-    }
-    for (int i = 0; i < num_clusters; i++) {
-        projections[i] = coms[i * 3] * eigenvectors[0][0] + coms[i * 3 + 1] * eigenvectors[0][1] + coms[i * 3 + 2] * eigenvectors[0][2];
-    }
-
-    // Sort the clusters based on their projections
-    int* sorted_clusters = (int*)malloc(num_clusters * sizeof(int));
-    if (sorted_clusters == NULL) {
-        fprintf(stderr, "Memory allocation failed for sorted_clusters\n");
-        free(coms);
-        free(projections);
-        for (int i = 0; i < 3; i++) {
-            free(data[i]);
-        }
-        free(data);
-        for (int i = 0; i < num_clusters; i++) {
-            free(data_t[i]);
-        }
-        free(data_t);
-        for (int i = 0; i < 3; i++) {
-            free(cov[i]);
-        }
-        free(cov);
-        for (int i = 0; i < 3; i++) {
-            free(eigenvectors[i]);
-        }
-        free(eigenvectors);
-        return;
-    }
-    for (int i = 0; i < num_clusters; i++) {
-        sorted_clusters[i] = i + 1;
-    }
-    qsort(sorted_clusters, num_clusters, sizeof(int), compare_projections);
-
-    // Identify the molecular layers
-    int* layer_indices = (int*)malloc(num_clusters * sizeof(int));
-    if (layer_indices == NULL) {
-        fprintf(stderr, "Memory allocation failed for layer_indices\n");
-        free(coms);
-        free(sorted_clusters);
-        free(projections);
-        for (int i = 0; i < 3; i++) {
-            free(data[i]);
-        }
-        free(data);
-        for (int i = 0; i < num_clusters; i++) {
-            free(data_t[i]);
-        }
-        free(data_t);
-        for (int i = 0; i < 3; i++) {
-            free(cov[i]);
-        }
-        free(cov);
-        for (int i = 0; i < 3; i++) {
-            free(eigenvectors[i]);
-        }
-        free(eigenvectors);
-        return;
-    }
-    int num_layers = 0;
-    double layer_threshold = 3.0;
-    layer_indices[0] = 0;
-    for (int i = 1; i < num_clusters; i++) {
-        double dz = fabs(projections[i] - projections[i - 1]);
-        if (dz > layer_threshold) {
-            num_layers++;
-        }
-        layer_indices[i] = num_layers;
-    }
-    num_layers++;
-
-    // Print the molecular layers and the distance between neighboring layers
-    fprintf(stdout, "Molecular layers:\n");
-    for (int i = 0; i < num_layers; i++) {
-        fprintf(stdout, "Layer %d: ", i + 1);
-        for (int j = 0; j < num_clusters; j++) {
-            if (layer_indices[j] == i) {
-                fprintf(stdout, "%d ", sorted_clusters[j]);
-            }
-        }
-        fprintf(stdout, "\n");
-    }
-
-    // Check if the structure is layered
-    bool is_layered = true;
-    for (int i = 1; i < num_layers; i++) {
-        int j = 0;
-        while (j < num_clusters && layer_indices[j] != i) {
-            j++;
-        }
-        if (j >= num_clusters) {
-            fprintf(stderr, "Error: j index out of bounds\n");
-            free(coms);
-            free(sorted_clusters);
-            free(projections);
-            free(layer_indices);
-            for (int k = 0; k < 3; k++) {
-                free(data[k]);
-            }
-            free(data);
-            for (int k = 0; k < num_clusters; k++) {
-                free(data_t[k]);
-            }
-            free(data_t);
-            for (int k = 0; k < 3; k++) {
-                free(cov[k]);
-            }
-            free(cov);
-            for (int k = 0; k < 3; k++) {
-                free(eigenvectors[k]);
-            }
-            free(eigenvectors);
-            return;
-        }
-        int k = j + 1;
-        while (k < num_clusters) {
-            k++;
-        }
-        if (k > num_clusters) {
-            fprintf(stderr, "Error: k index out of bounds\n");
-            fprintf(stderr, "k index = %d\n", k);
-            fprintf(stderr, "layer_indices[%d] = %d\n", k, i - 1);
-            free(coms);
-            free(sorted_clusters);
-            free(projections);
-            free(layer_indices);
-            for (int l = 0; l < 3; l++) {
-                free(data[l]);
-            }
-            free(data);
-            for (int l = 0; l < num_clusters; l++) {
-                free(data_t[l]);
-            }
-            free(data_t);
-            for (int l = 0; l < 3; l++) {
-                free(cov[l]);
-            }
-            free(cov);
-            for (int l = 0; l < 3; l++) {
-                free(eigenvectors[l]);
-            }
-            free(eigenvectors);
-            return;
-        }
-        double dz = fabs(projections[j] - projections[k]);
-        if (dz < layer_threshold) {
-            is_layered = false;
-            break;
-        }
-    }
-
-    if (is_layered) {
-        fprintf(stdout, "The structure is layered.\n");
-    } else {
-        fprintf(stdout, "The structure is not layered.\n");
-    }
-
-    // Find nearest molecules and calculate distances
-    double** distances = (double**)malloc(num_clusters * sizeof(double*));
-    if (distances == NULL) {
-        fprintf(stderr, "Memory allocation failed for distances\n");
-        free(coms);
-        free(sorted_clusters);
-        free(projections);
-        free(layer_indices);
-        for (int i = 0; i < 3; i++) {
-            free(data[i]);
-        }
-        free(data);
-        for (int i = 0; i < num_clusters; i++) {
-            free(data_t[i]);
-        }
-        free(data_t);
-        for (int i = 0; i < 3; i++) {
-            free(cov[i]);
-        }
-        free(cov);
-        for (int i = 0; i < 3; i++) {
-            free(eigenvectors[i]);
-        }
-        free(eigenvectors);
-        return;
-    }
-    for (int i = 0; i < num_clusters; i++) {
-        distances[i] = (double*)malloc(num_clusters * sizeof(double));
-        if (distances[i] == NULL) {
-            fprintf(stderr, "Memory allocation failed for distances[%d]\n", i);
-            free(coms);
-            free(sorted_clusters);
-            free(projections);
-            free(layer_indices);
-            for (int j = 0; j < 3; j++) {
-                free(data[j]);
-            }
-            free(data);
-            for (int j = 0; j < num_clusters; j++) {
-                free(data_t[j]);
-            }
-            free(data_t);
-            for (int j = 0; j < 3; j++) {
-                free(cov[j]);
-            }
-            free(cov);
-            for (int j = 0; j < 3; j++) {
-                free(eigenvectors[j]);
-            }
-            free(eigenvectors);
-            for (int j = 0; j < i; j++) {
-                free(distances[j]);
-            }
-            free(distances);
-            return;
-        }
-    }
-
-    find_nearest_molecules(atoms, n, labels, num_clusters, distances);
-
-    // Print the distances between neighboring layers
-    fprintf(stdout, "Distances between neighboring layers:\n");
-    for (int i = 0; i < num_layers - 1; i++) {
-        double min_distance = INFINITY;
-        for (int j = 0; j < num_clusters; j++) {
-            if (layer_indices[j] == i) {
-                for (int k = 0; k < num_clusters; k++) {
-                    if (layer_indices[k] == i + 1) {
-                        if (distances[j][k] < min_distance) {
-                            min_distance = distances[j][k];
-                        }
-                    }
-                }
-            }
-        }
-        fprintf(stdout, "Distance between layer %d and layer %d: %f\n", i + 1, i + 2, min_distance);
-    }
-
-    // Check if the structure is layered based on the distances
-    double factor = 1.15;
-    bool is_layered_by_distance = true;
-    for (int i = 0; i < num_layers - 1; i++) {
-        double min_distance = INFINITY;
-        for (int j = 0; j < num_clusters; j++) {
-            if (layer_indices[j] == i) {
-                for (int k = 0; k < num_clusters; k++) {
-                    if (layer_indices[k] == i + 1) {
-                        if (distances[j][k] < min_distance) {
-                            min_distance = distances[j][k];
-                        }
-                    }
-                }
-            }
-        }
-        if (min_distance > factor * min_distance) {
-            is_layered_by_distance = false;
-            break;
-        }
-    }
-
-    if (is_layered_by_distance) {
-        fprintf(stdout, "The structure is layered based on distances.\n");
-    } else {
-        fprintf(stdout, "The structure is not layered based on distances.\n");
-    }
-
-    free(coms);
-    free(sorted_clusters);
-    free(projections);
-    free(layer_indices);
-    for (int i = 0; i < 3; i++) {
-        free(data[i]);
-    }
-    free(data);
-    for (int i = 0; i < num_clusters; i++) {
-        free(data_t[i]);
-    }
-    free(data_t);
-    for (int i = 0; i < 3; i++) {
-        free(cov[i]);
-    }
-    free(cov);
-    for (int i = 0; i < 3; i++) {
-        free(eigenvectors[i]);
-    }
-    free(eigenvectors);
-    for (int i = 0; i < num_clusters; i++) {
-        free(distances[i]);
-    }
-    free(distances);
+    return false;
 }
 
 int main() {
@@ -1065,9 +676,8 @@ int main() {
         return !pizdec;
     }
 
-    convert_fractional_to_direct(); // for clear bond lengths checking
-
-    create_supercell(&structure, 3, 3, 3);
+    convert_fractional_to_direct();
+    create_supercell(&structure, 5, 5, 5);
 
     int* labels = (int*)malloc(structure.atom_count * sizeof(int));
     if (labels == NULL) {
@@ -1079,7 +689,7 @@ int main() {
         labels[i] = 0;
     }
 
-    dbscan(structure.atoms, structure.atom_count, labels);
+    dbscan(structure.atoms, structure.atom_count, labels, structure.lattice);
 
     for (int i = 0; i < structure.atom_count; i++) {
         fprintf(stdout, "Atom %d (%s): Cluster %d\n", i, structure.atoms[i].element, labels[i]);
@@ -1102,7 +712,24 @@ int main() {
         return 1;
     }
 
-    analyze_molecular_layers(structure.atoms, structure.atom_count, labels, num_clusters);
+    Vector3 principal_axis;
+    MillerIndex hkl;
+    perform_pca(structure.atoms, structure.atom_count, labels, &principal_axis, &hkl);
+
+    if (!validate_layer(labels, num_clusters, &structure, principal_axis)) {
+        printf("Layer validation failed. Trying alternative directions...\n");
+        if (!try_alternative_layer_directions(labels, num_clusters, &structure)) {
+            printf("All alternative layer directions failed. Exiting.\n");
+            free(labels);
+            free(structure.atoms);
+            fclose(stdout);
+            return 1;
+        }
+    }
+
+    printf("Layer validation passed. Proceeding with analysis.\n");
+    calculate_geometric_centers(structure.atoms, structure.atom_count, labels, num_clusters);
+    integrate_pca_with_structure(&structure, labels);
 
     free(labels);
     free(structure.atoms);
