@@ -71,6 +71,13 @@ int parse_cif(const char *filename) {
     int line_count = 0;
     int capacity = 0;
     int current_line = 0;
+    int *matching_lines_atom_site = NULL; // pointer to the array with number of lines starting from "_atom_site"
+    int count = 0; // counter for the number of elements in the array matching_lines
+
+    char *last_atom_site_line = NULL; // Variable to store the last line starting with "_atom_site_"
+    int last_atom_site_line_number = 0; // Variable to store the line number of the last "_atom_site_" line
+    int first_atom_site_line_number = 0; // Variable to store the line number of the first "_atom_site_" line
+    int in_atom_site_section = 0; // Flag to indicate if we are in the section with "_atom_site_" lines
 
     while (fgets(line, sizeof(line), file)) {
         current_line++;
@@ -93,7 +100,31 @@ int parse_cif(const char *filename) {
                     return 1;
                 }
             }
-            line_number[line_count++] = current_line; // array with numbers of lines = amount of elements in atomic coords line, after (last element + 1) we may parse coords
+            line_number[line_count++] = current_line;
+        }
+
+        if (strncmp(line, "_atom_site_", 11) == 0) {
+            in_atom_site_section = 1; // We are in the section with "_atom_site_" lines
+            count++;
+            matching_lines_atom_site = realloc(matching_lines_atom_site, count * sizeof(int));
+            if (matching_lines_atom_site == NULL) {
+                perror("Ошибка при выделении памяти");
+                return EXIT_FAILURE;
+            }
+
+            matching_lines_atom_site[count - 1] = current_line; // Сохраняем номер текущей строки
+
+            // Сохраняем последнюю строку, начинающуюся с "_atom_site_"
+            if (last_atom_site_line != NULL) {
+                free(last_atom_site_line);
+            }
+            last_atom_site_line = strdup(line);
+            last_atom_site_line_number = current_line; // Сохраняем номер строки
+
+            // Сохраняем номер первой строки, начинающейся с "_atom_site_"
+            if (first_atom_site_line_number == 0) {
+                first_atom_site_line_number = current_line;
+            }
         }
 
         if (strstr(line, "_atom_site_type_symbol") != NULL) {
@@ -110,6 +141,11 @@ int parse_cif(const char *filename) {
 
         if (strstr(line, "_atom_site_fract_z") != NULL) {
             lines_with_coords[2] = current_line;
+        }
+
+        // Check for empty line after "_atom_site_" lines
+        if (in_atom_site_section && line[0] == '\n') {
+            break; // Stop searching after the first empty line following "_atom_site_" lines
         }
     }
 
@@ -165,20 +201,20 @@ int parse_cif(const char *filename) {
             token = strtok(inputCopy, delimiter);
             while (token != NULL) {
                 count++;
-                if (count == (line_with_atom_type - line_number[0] + 1)) {
+                if (count == (line_with_atom_type - first_atom_site_line_number + 1)) {
                     strncpy(structure.atoms[atom_index].element, token, sizeof(structure.atoms[atom_index].element) - 1);
                     structure.atoms[atom_index].element[sizeof(structure.atoms[atom_index].element) - 1] = '\0';
                 }
 
-                if (count == (lines_with_coords[0] - line_number[0] + 1)) {
+                if (count == (lines_with_coords[0] - first_atom_site_line_number + 1)) {
                     sscanf(token, "%lf", &structure.atoms[atom_index].x);
                 }
 
-                if (count == (lines_with_coords[1] - line_number[0] + 1)) {
+                if (count == (lines_with_coords[1] - first_atom_site_line_number + 1)) {
                     sscanf(token, "%lf", &structure.atoms[atom_index].y);
                 }
 
-                if (count == (lines_with_coords[2] - line_number[0] + 1)) {
+                if (count == (lines_with_coords[2] - first_atom_site_line_number + 1)) {
                     sscanf(token, "%lf", &structure.atoms[atom_index].z);
                 }
 
@@ -193,6 +229,7 @@ int parse_cif(const char *filename) {
     structure.atom_count = atom_index;
     fclose(file);
     free(line_number);
+    free(matching_lines_atom_site);
 
     calculate_lattice_matrix();
 
