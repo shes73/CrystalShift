@@ -13,7 +13,7 @@ make all
 ```
 Or do it manually. For the main CrystalShift module use the command below:
 ```bash
-gcc -std=c99 main.c structures.c poscar_parser.c poscar_writer.c cif_parser.c cif_writer.c xyz_parser.c xyz_writer.c atomic_coords_editor.c basis_changer.c -lm -o crystalshift
+gcc -std=c99 main.c structures.c poscar_parser.c poscar_writer.c cif_parser.c cif_writer.c xyz_parser.c xyz_writer.c atomic_coords_editor.c basis_changer.c cell_filler.c -lm -o crystalshift
 ```
 For CrystalShift layers module:
 ```bash
@@ -25,6 +25,8 @@ Let's have a close look at each module. Here are listed modules source files wit
 
 ***structures.c*** is the prime source file of the program. Structures with all information about crystal lattice and atoms is located there. When you run any of the modules: converters, basis changer or coordinate editor, it will definitely write information during parsing into structures, update it, save it in a new file.
 
+***cell_filler.c*** is module for checking whether the loaded file contains a complete basis of a crystal cell or only an independent part (which can be multiplied by symmetry operations).
+
 ***atomic_coords_editor.c*** is module for editing atomic coordinates by adding a vector (x, y, z coordinates) that will be simply added to the coordinates of all atoms in the file.
 
 ***basis_changer.c*** includes two features at once - basis change (no new atoms added) and supercell generation with generating new atomic positions.
@@ -35,6 +37,8 @@ Let's have a close look at each module. Here are listed modules source files wit
 
 ## Usage warnings
 - First of all, always check all input and output data. This applies not only to the CrystalShift, but in general to all programs. :)
+
+- Please note that the cell must contain all molecules according to the symmetry operations. Otherwise, use spetial option #0 to fulfill cell with all required molecules before processing the file.
 
 - I strongly recommend not to change the basis and create a supercell at the same time. When you change the basis, CrystalShift does not write new atomic coordinates into the structure, whereas when you create a supercell, the new atomic positions are written and saved. In a small number of test cases, the basis change and supercell generation work well, but it has not been thoroughly tested yet.
 
