@@ -48,6 +48,7 @@ Let's have a close look at each module. Here are listed modules source files wit
 
 ## Examples of usage
 ### 0. Filling the unit cell
+![cell_filler_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/cell_filler.png)
 ```bash
 Please note that the cell must contain all molecules according to the symmetry operations.
 Otherwise, use option #0 before processing the file.
