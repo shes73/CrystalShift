@@ -68,7 +68,7 @@ Enter the path to the output CIF file:
 > C:\cif_editor\18336861_full.cif
 ```
 
-In the negative scenario when you already have full unit cell of molecules you will see warning:
+In the negative case scenario, when you already have a complete unit cell of molecules, you will see a warning:
 
 ```bash
 Warning: duplicate coordinates found!
