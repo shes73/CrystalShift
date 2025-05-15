@@ -38,7 +38,7 @@ Let's have a close look at each module. Here are listed modules source files wit
 ## Usage warnings
 - First of all, always check all input and output data. This applies not only to the CrystalShift, but in general to all programs. :)
 
-- Please note that the cell must contain all molecules according to the symmetry operations. Otherwise, use spetial option #0 to fulfill cell with all required molecules before processing the file.
+- ote that the cell must contain all molecules according to the symmetry operations. Otherwise, use spetial option #0 to fulfill cell with all required molecules before processing the file.
 
 - I strongly recommend not to change the basis and create a supercell at the same time. When you change the basis, CrystalShift does not write new atomic coordinates into the structure, whereas when you create a supercell, the new atomic positions are written and saved. In a small number of test cases, the basis change and supercell generation work well, but it has not been thoroughly tested yet.
 
@@ -47,11 +47,46 @@ Let's have a close look at each module. Here are listed modules source files wit
 - CrystalShift writes POSCAR files only in Direct/Fractional format. The ability to write coordinates in Cartesian format will be added in a future update.
 
 ## Examples of usage
+### 0. Filling the unit cell
+```bash
+Please note that the cell must contain all molecules according to the symmetry operations.
+Otherwise, use option #0 before processing the file.
+
+Choose the option you need:
+0. Fill the cell with atoms via symmetry operations
+1. Change basis of unit cell
+2. Edit atomic coordinates
+3. Converter CIF -> POSCAR
+4. Converter CIF -> xyz
+5. Converter POSCAR -> CIF
+6. Converter POSCAR -> xyz
+> 0
+Fill the cell with atoms via symmetry operations
+Enter the path to the CIF file:
+> C:\cif_editor\18336861.cif
+Enter the path to the output CIF file:
+> C:\cif_editor\18336861_full.cif
+```
+
+In the negative scenario when you already have full unit cell of molecules you will see warning:
+
+```bash
+Warning: duplicate coordinates found!
+Do you want to remove duplicates? (yes/no):
+> yes
+```
+
+After removing the duplicates, you will get the initial CIF file.
+
 ### 1. Basis change
 ![basis_change_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/basis_change.jpg)
 ```bash
 > crystalshift
+Please note that the cell must contain all molecules according to the symmetry operations.
+Otherwise, use option #0 before processing the file.
+
 Choose the option you need:
+0. Fill the cell with atoms via symmetry operations
 1. Change basis of unit cell
 2. Edit atomic coordinates
 3. Converter CIF -> POSCAR
@@ -87,7 +122,11 @@ Enter the path to save the new CIF file:
 ![basis_change_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/supercell_visualisation.jpg)
 ```bash
 > crystalshift
+Please note that the cell must contain all molecules according to the symmetry operations.
+Otherwise, use option #0 before processing the file.
+
 Choose the option you need:
+0. Fill the cell with atoms via symmetry operations
 1. Change basis of unit cell
 2. Edit atomic coordinates
 3. Converter CIF -> POSCAR
@@ -127,7 +166,11 @@ Enter the path to save the new CIF file:
 ### 3. Atomic coordinates editor
 ![atomic_coords_edition_visualisation](https://github.com/shes73/CrystalShift/blob/main/images/atomic_coords_edition_visualisation.jpg)
 ```bash
+Please note that the cell must contain all molecules according to the symmetry operations.
+Otherwise, use option #0 before processing the file.
+
 Choose the option you need:
+0. Fill the cell with atoms via symmetry operations
 1. Change basis of unit cell
 2. Edit atomic coordinates
 3. Converter CIF -> POSCAR
@@ -156,7 +199,11 @@ Enter the path to save the new CIF file:
 #### 1. CIF to POSCAR converter
 ```bash
 > crystalshift
+Please note that the cell must contain all molecules according to the symmetry operations.
+Otherwise, use option #0 before processing the file.
+
 Choose the option you need:
+0. Fill the cell with atoms via symmetry operations
 1. Change basis of unit cell
 2. Edit atomic coordinates
 3. Converter CIF -> POSCAR
@@ -188,7 +235,11 @@ Enter the path to the POSCAR file:
 #### 2. CIF to xyz converter
 ```bash
 > crystalshift
+Please note that the cell must contain all molecules according to the symmetry operations.
+Otherwise, use option #0 before processing the file.
+
 Choose the option you need:
+0. Fill the cell with atoms via symmetry operations
 1. Change basis of unit cell
 2. Edit atomic coordinates
 3. Converter CIF -> POSCAR
