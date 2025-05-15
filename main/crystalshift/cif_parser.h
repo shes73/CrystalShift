@@ -7,6 +7,8 @@ void calculate_lattice_matrix();
 
 void remove_errors(char *line);
 
+void parse_symmetry_operations_from_file(FILE *file);
+
 int parse_cif(const char *filename);
 
 #endif

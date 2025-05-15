@@ -13,6 +13,10 @@ typedef struct {
     Atom *atoms;
     int atom_count;
     int atom_capacity;
+
+    // for symmetry op parsing
+    char **symmetry_operations;
+    int symmetry_operations_count;
 } Structure;
 
 

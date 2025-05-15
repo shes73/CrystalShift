@@ -6,6 +6,7 @@
 #include "cif_parser.h"
 
 #define M_PI 3.14159265358979323846
+#define MAX_OPERATIONS 36
 
 char *strdup(const char *s) {
     size_t len = strlen(s) + 1;
@@ -48,6 +49,94 @@ void remove_errors(char *line) {
     *dst = '\0';
 }
 
+void parse_symmetry_operations_from_file(FILE *file) {
+    char line[256];
+    int in_loop = 0;
+    int symmetry_column_index = -1;
+    int column_count = 0;
+    int data_started = 0;
+    int count = 0;
+    char *operations[192]; // Убедитесь, что этот массив достаточно велик для всех операций
+
+    rewind(file);
+
+    const char *symmetry_keys[] = {
+        "_symmetry_equiv_pos_as_xyz",
+        "_space_group_symop_operation_xyz"
+    };
+
+    while (fgets(line, sizeof(line), file)) {
+        // Start of loop
+        if (strstr(line, "loop_")) {
+            in_loop = 1;
+            symmetry_column_index = -1;
+            column_count = 0;
+            data_started = 0;
+            continue;
+        }
+
+        // Inside loop: header lines
+        if (in_loop && line[0] == '_') {
+            for (int i = 0; i < sizeof(symmetry_keys) / sizeof(symmetry_keys[0]); i++) {
+                if (strstr(line, symmetry_keys[i])) {
+                    symmetry_column_index = column_count;
+                }
+            }
+            column_count++;
+            continue;
+        }
+
+        // Start reading data lines
+        if (in_loop && line[0] != '_' && symmetry_column_index != -1) {
+            data_started = 1;
+        }
+
+        if (data_started) {
+            if (line[0] == '\n' || line[0] == '\r' || line[0] == '#') break;
+
+            char *start = line;
+            while (*start == ' ' || *start == '\t') start++;
+
+            // SHELX-style: quoted single string
+            if (*start == '\'' || *start == '"') {
+                start++;
+                char *end = strchr(start, '\'');
+                if (!end) end = strchr(start, '"');
+                if (!end) end = strchr(start, '\n');
+                if (end) *end = '\0';
+                if (count < 192) {
+                    operations[count++] = strdup(start);
+                }
+            } else {
+                // Mercury-style: tokenized columns
+                int col = 0;
+                char *token = strtok(start, " \t\n\r");
+                while (token) {
+                    if (col == symmetry_column_index) {
+                        if (count < 192) {
+                            operations[count++] = strdup(token);
+                        }
+                        break;
+                    }
+                    token = strtok(NULL, " \t\n\r");
+                    col++;
+                }
+            }
+        }
+    }
+
+    if (count > 0) {
+        structure.symmetry_operations = malloc(sizeof(char *) * count);
+        for (int i = 0; i < count; i++) {
+            structure.symmetry_operations[i] = operations[i];
+        }
+        structure.symmetry_operations_count = count;
+    } else {
+        structure.symmetry_operations = NULL;
+        structure.symmetry_operations_count = 0;
+    }
+}
+
 int parse_cif(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (!file) {
@@ -61,6 +150,7 @@ int parse_cif(const char *filename) {
     if (structure.atoms == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         fclose(file);
+        free(structure.symmetry_operations);
         return 1;
     }
 
@@ -97,6 +187,7 @@ int parse_cif(const char *filename) {
                     perror("Error allocating memory!");
                     fclose(file);
                     free(structure.atoms);
+                    free(structure.symmetry_operations);
                     return 1;
                 }
             }
@@ -109,6 +200,9 @@ int parse_cif(const char *filename) {
             matching_lines_atom_site = realloc(matching_lines_atom_site, count * sizeof(int));
             if (matching_lines_atom_site == NULL) {
                 perror("Ошибка при выделении памяти");
+                fclose(file);
+                free(structure.atoms);
+                free(structure.symmetry_operations);
                 return EXIT_FAILURE;
             }
 
@@ -176,13 +270,15 @@ int parse_cif(const char *filename) {
 
             if (atom_index >= structure.atom_capacity) {
                 structure.atom_capacity *= 2;
-                structure.atoms = realloc(structure.atoms, sizeof(Atom) * structure.atom_capacity);
-                if (structure.atoms == NULL) {
+                Atom *temp_atoms = realloc(structure.atoms, sizeof(Atom) * structure.atom_capacity);
+                if (temp_atoms == NULL) {
                     fprintf(stderr, "Memory allocation failed\n");
                     fclose(file);
                     free(line_number);
+                    free(structure.symmetry_operations);
                     return 1;
                 }
+                structure.atoms = temp_atoms;
             }
 
             char *inputCopy = strdup(line);
@@ -191,6 +287,7 @@ int parse_cif(const char *filename) {
                 fclose(file);
                 free(line_number);
                 free(structure.atoms);
+                free(structure.symmetry_operations);
                 return 1;
             }
 
@@ -227,11 +324,13 @@ int parse_cif(const char *filename) {
     }
 
     structure.atom_count = atom_index;
+
+    calculate_lattice_matrix();
+    parse_symmetry_operations_from_file(file);
+
     fclose(file);
     free(line_number);
     free(matching_lines_atom_site);
-
-    calculate_lattice_matrix();
 
     return 0;
 }

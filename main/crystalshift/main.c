@@ -10,6 +10,7 @@
 #include "cif_writer.h"
 #include "poscar_writer.h"
 #include "xyz_writer.h"
+#include "cell_filler.h"
 
 Structure structure;
 Structure structure = {.atom_capacity = 100}; 
@@ -27,7 +28,10 @@ int main() {
     int sort_option = 1;
 
     int option;
-    printf("Choose the option you need:\n"
+    printf("Please note that the cell must contain all molecules according to the symmetry operations.\n" 
+    "Otherwise, use option #0 before processing the file.\n\n"
+    "Choose the option you need:\n"
+    "0. Fill the cell with atoms via symmetry operations\n"
     "1. Change basis of unit cell\n"
     "2. Edit atomic coordinates\n"
     "3. Converter CIF -> POSCAR\n"
@@ -37,6 +41,24 @@ int main() {
     scanf("%d", &option);
 
     switch (option) {
+        case 0:
+            printf("Fill the cell with atoms via symmetry operations\n");
+            printf("Enter the path to the CIF file: ");
+            scanf("%s", filename);
+                if (parse_cif(filename) != 0) {
+                    printf("Error parsing CIF file!\n");
+                    return 1;
+                } else {
+                    fill_cell(&structure);
+                }
+
+            printf("Enter the path to the output CIF file: ");
+            scanf("%s", filename);
+            write_cif(filename);
+
+            free(structure.atoms);
+
+            break;
         case 1:
             printf("Change basis of unit cell\n");
 
