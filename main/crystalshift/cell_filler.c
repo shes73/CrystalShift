@@ -117,9 +117,4 @@ void fill_cell(Structure *structure) {
         }
     }
 
-    printf("Final atom count after symmetry: %d\n", structure->atom_count);
-    for (int i = 0; i < structure->atom_count; i++) {
-        Atom *a = &structure->atoms[i];
-        printf("%s: (%.6f, %.6f, %.6f)\n", a->element, a->x, a->y, a->z);
-    }
 }
