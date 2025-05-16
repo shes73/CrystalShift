@@ -38,7 +38,7 @@ Let's have a close look at each module. Here are listed modules source files wit
 ## Usage warnings
 - First of all, always check all input and output data. This applies not only to the CrystalShift, but in general to all programs. :)
 
-- ote that the cell must contain all molecules according to the symmetry operations. Otherwise, use spetial option #0 to fulfill cell with all required molecules before processing the file.
+- Note that the cell must contain all molecules according to the symmetry operations. Otherwise, use spetial option #0 to fulfill cell with all required molecules before processing the file.
 
 - I strongly recommend not to change the basis and create a supercell at the same time. When you change the basis, CrystalShift does not write new atomic coordinates into the structure, whereas when you create a supercell, the new atomic positions are written and saved. In a small number of test cases, the basis change and supercell generation work well, but it has not been thoroughly tested yet.
 
