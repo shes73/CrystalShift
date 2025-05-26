@@ -77,7 +77,7 @@ void parse_symmetry_operations_from_file(FILE *file) {
 
         // Inside loop: header lines
         if (in_loop && line[0] == '_') {
-            for (int i = 0; i < sizeof(symmetry_keys) / sizeof(symmetry_keys[0]); i++) {
+            for (int i = 0; i < (int)(sizeof(symmetry_keys) / sizeof(symmetry_keys[0])); i++) {
                 if (strstr(line, symmetry_keys[i])) {
                     symmetry_column_index = column_count;
                 }
@@ -165,7 +165,9 @@ int parse_cif(const char *filename) {
     int count = 0; // counter for the number of elements in the array matching_lines
 
     char *last_atom_site_line = NULL; // Variable to store the last line starting with "_atom_site_"
+    #define UNUSED(x) (void)(x)
     int last_atom_site_line_number = 0; // Variable to store the line number of the last "_atom_site_" line
+    UNUSED(last_atom_site_line_number);
     int first_atom_site_line_number = 0; // Variable to store the line number of the first "_atom_site_" line
     int in_atom_site_section = 0; // Flag to indicate if we are in the section with "_atom_site_" lines
 
