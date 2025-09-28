@@ -105,7 +105,9 @@ int parse_poscar(const char *filename) {
     }
 
     structure.atom_count = current_atom_index;
+    calculate_lengths_and_angles(&structure);
     fclose(file);
 
     return 0;
+
 }
