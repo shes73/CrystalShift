@@ -7,8 +7,6 @@
 
 #define M_PI 3.14159265358979323846
 
-Structure structure;
-
 void inverse_matrix(double transformation_matrix[3][3], double inversed_transformation_matrix[3][3]) {
     double temporary_matrix[3][3];
     double ratio;
@@ -143,3 +141,4 @@ int parse_xyz(const char *filename, int xyz_format) {
     fclose(file);
     return 0;
 }
+
